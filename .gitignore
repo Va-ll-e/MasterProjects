@@ -1,3 +1,5 @@
+# .gitignore template
+#
 # This .gitignore file should be placed at the root of your Unity project directory
 #
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
@@ -6,7 +8,7 @@
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
 [Aa]pp/
 *[Bb]uild/
-/[Ll]ibrary/
+*[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
 *[Bb]uild/

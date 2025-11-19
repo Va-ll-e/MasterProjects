@@ -1,0 +1,10 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/VRUI/UISyles.uss?fileID=7433441132597879392&amp;guid=c56748c26a8ab564ca34547c0b6b6107&amp;type=3#UISyles" />
+    <ui:VisualElement style="flex-grow: 1;">
+        <ui:Label text="COLOR UI" />
+        <ui:Button text="RED" name="RedButton" class="button" />
+        <ui:Button text="GREEN" name="GreenButton" class="button" />
+        <ui:Button text="BLUE" name="BlueButton" class="button" />
+        <ui:Button text="Back" name="BackButton" class="button" />
+    </ui:VisualElement>
+</ui:UXML>

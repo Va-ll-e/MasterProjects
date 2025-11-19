@@ -1,0 +1,9 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Hand_UI/UI%20Stylesheet.uss?fileID=7433441132597879392&amp;guid=28c657d5c554ed8478cf12698e49319a&amp;type=3#UI Stylesheet" />
+    <ui:VisualElement name="Buttons" style="flex-grow: 1; background-color: rgb(197, 197, 197);">
+        <ui:Label text="Color UI" name="Label" style="align-self: auto; align-items: auto; align-content: auto; font-size: 30px; -unity-font-style: bold; -unity-text-align: upper-center;" />
+        <ui:Button text="Red-ish" name="RedButton" class="button redBtn" />
+        <ui:Button text="Green" name="GreenButton" class="button greenBtn" />
+        <ui:Button text="Blue" name="BlueButton" class="button blueBtn" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,15 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/NavUI/UISS.uss?fileID=7433441132597879392&amp;guid=638f76f20a94afd46ad3e44a2ddc3ee1&amp;type=3#UISS" />
+    <ui:VisualElement style="flex-grow: 1; background-color: rgb(152, 152, 152);">
+        <ui:VisualElement class="VE" style="flex-grow: 1; justify-content: center;">
+            <ui:Button text="Forward" name="ForwardBTN" class="BTN" style="border-top-width: 2px;" />
+        </ui:VisualElement>
+        <ui:VisualElement class="VE" style="flex-grow: 1; flex-direction: row; align-items: center; align-content: auto; width: 251px; align-self: center; justify-content: space-between;">
+            <ui:Button text="Rotate Left" name="LeftBTN" class="BTN" style="position: relative; flex-direction: column; justify-content: center; align-self: auto; align-items: auto; align-content: auto; left: -34px; border-left-width: 2px;" />
+            <ui:Button text="Rotate Right" name="RightBTN" class="BTN" style="flex-direction: column; justify-content: center; align-self: auto; align-content: auto; right: -41px; border-right-width: 2px;" />
+        </ui:VisualElement>
+        <ui:VisualElement class="VE" style="flex-grow: 1; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; justify-content: center;">
+            <ui:Button text="Backward" name="BackBTN" class="BTN" style="border-bottom-width: 2px;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
