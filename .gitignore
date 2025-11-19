@@ -3,9 +3,13 @@
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
 .utmp/
+/[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+[Aa]pp/
+*[Bb]uild/
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
+*[Bb]uild/
 /[Bb]uild/
 /[Bb]uilds/
 /[Ll]ogs/
@@ -96,4 +100,8 @@ InitTestScene*.unity*
 /[Aa]ssets/Unity.VisualScripting.Generated/VisualScripting.Core/Property Providers.meta
 
 # Auto-generated scenes by play mode tests
-/[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+Assets/AssetStoreTools*
+.idea
+.vscode/
+.opendb
+*.pubxml
