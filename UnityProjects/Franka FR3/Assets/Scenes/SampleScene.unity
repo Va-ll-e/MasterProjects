@@ -572,8 +572,9 @@ GameObject:
   m_Component:
   - component: {fileID: 123057443}
   - component: {fileID: 123057442}
+  - component: {fileID: 123057444}
   m_Layer: 0
-  m_Name: ROS
+  m_Name: ROSController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -616,6 +617,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &123057444
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 123057441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 461497f90629ae04ba34d44af8800bcb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::URDF.Research_3.Scripts.EmergencyStop
 --- !u!4 &135172603 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 8fbc7a32640245441a20cb90a9d8ddf9, type: 3}
@@ -1518,7 +1531,7 @@ MeshCollider:
   m_Enabled: 1
   serializedVersion: 5
   m_Convex: 1
-  m_CookingOptions: 30
+  m_CookingOptions: -1
   m_Mesh: {fileID: 4300000, guid: b0e73cf93233a764db7850c761f72506, type: 2}
 --- !u!1001 &452702814
 PrefabInstance:
@@ -1745,6 +1758,7 @@ GameObject:
   - component: {fileID: 503797884}
   - component: {fileID: 503797883}
   - component: {fileID: 503797882}
+  - component: {fileID: 503797886}
   m_Layer: 0
   m_Name: fr3_hand
   m_TagString: Untagged
@@ -1885,6 +1899,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.Robotics.UrdfImporter::Unity.Robotics.UrdfImporter.UrdfLink
   IsBaseLink: 0
+--- !u!114 &503797886
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 503797880}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dd53129134c9aa4ca4dcd2d5f83f030, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::URDF.Research_3.Scripts.CollisionDetection
 --- !u!1001 &503840111
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2732,6 +2758,7 @@ GameObject:
   - component: {fileID: 827816632}
   - component: {fileID: 827816631}
   - component: {fileID: 827816630}
+  - component: {fileID: 827816634}
   m_Layer: 0
   m_Name: fr3_link2
   m_TagString: Untagged
@@ -2870,6 +2897,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.Robotics.UrdfImporter::Unity.Robotics.UrdfImporter.UrdfLink
   IsBaseLink: 0
+--- !u!114 &827816634
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 827816628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dd53129134c9aa4ca4dcd2d5f83f030, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::URDF.Research_3.Scripts.CollisionDetection
 --- !u!4 &829424809 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 659ab0924ccb33841bfd63a383fbe1ea, type: 3}
@@ -3017,6 +3056,7 @@ GameObject:
   - component: {fileID: 876878795}
   - component: {fileID: 876878794}
   - component: {fileID: 876878793}
+  - component: {fileID: 876878797}
   m_Layer: 0
   m_Name: fr3_link7
   m_TagString: Untagged
@@ -3155,6 +3195,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.Robotics.UrdfImporter::Unity.Robotics.UrdfImporter.UrdfLink
   IsBaseLink: 0
+--- !u!114 &876878797
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 876878791}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dd53129134c9aa4ca4dcd2d5f83f030, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::URDF.Research_3.Scripts.CollisionDetection
 --- !u!4 &937060866 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 3264d618e69184b478df24df575e2413, type: 3}
@@ -3328,6 +3380,7 @@ GameObject:
   - component: {fileID: 1021303989}
   - component: {fileID: 1021303988}
   - component: {fileID: 1021303987}
+  - component: {fileID: 1021303991}
   m_Layer: 0
   m_Name: fr3_link3
   m_TagString: Untagged
@@ -3466,6 +3519,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.Robotics.UrdfImporter::Unity.Robotics.UrdfImporter.UrdfLink
   IsBaseLink: 0
+--- !u!114 &1021303991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1021303985}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dd53129134c9aa4ca4dcd2d5f83f030, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::URDF.Research_3.Scripts.CollisionDetection
 --- !u!1 &1028034808
 GameObject:
   m_ObjectHideFlags: 0
@@ -3557,6 +3622,117 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9090ae501ff9cd459bec5271d40249c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Robotics.UrdfImporter::Unity.Robotics.UrdfImporter.UrdfVisuals
+--- !u!1 &1063701006
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1063701010}
+  - component: {fileID: 1063701009}
+  - component: {fileID: 1063701008}
+  - component: {fileID: 1063701007}
+  m_Layer: 0
+  m_Name: Pedestal (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!65 &1063701007
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1063701006}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.0000001, y: 2, z: 1.0000002}
+  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
+--- !u!23 &1063701008
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1063701006}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 5f5b89f9d70721d4cbdc0c99ec4ba2bf, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &1063701009
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1063701006}
+  m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &1063701010
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1063701006}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.50000006, y: 0.4999999, z: -0.4999986, w: 0.5000015}
+  m_LocalPosition: {x: -0.02, y: 1.047, z: 0.317}
+  m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: -90}
 --- !u!1001 &1073366928
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4103,7 +4279,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1e8a9f2a7565f654bb36319c7b559489, type: 2}
+  - {fileID: 2100000, guid: dcc81fdf8a676a944bdd84a55bbc0547, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4281,7 +4457,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: dcc81fdf8a676a944bdd84a55bbc0547, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4320,12 +4496,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1273061726}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -1, z: -0, w: 0}
+  m_LocalPosition: {x: -0.006, y: -0.496, z: -0.049}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 2113401011}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1289809101
 PrefabInstance:
@@ -4412,6 +4588,7 @@ GameObject:
   - component: {fileID: 1361793354}
   - component: {fileID: 1361793353}
   - component: {fileID: 1361793352}
+  - component: {fileID: 1361793356}
   m_Layer: 0
   m_Name: fr3_link1
   m_TagString: Untagged
@@ -4550,6 +4727,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.Robotics.UrdfImporter::Unity.Robotics.UrdfImporter.UrdfLink
   IsBaseLink: 0
+--- !u!114 &1361793356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1361793350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dd53129134c9aa4ca4dcd2d5f83f030, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NewMonoBehaviourScript
 --- !u!1001 &1370925601
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5314,6 +5503,7 @@ GameObject:
   - component: {fileID: 1580292915}
   - component: {fileID: 1580292914}
   - component: {fileID: 1580292913}
+  - component: {fileID: 1580292917}
   m_Layer: 0
   m_Name: fr3_link4
   m_TagString: Untagged
@@ -5452,6 +5642,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.Robotics.UrdfImporter::Unity.Robotics.UrdfImporter.UrdfLink
   IsBaseLink: 0
+--- !u!114 &1580292917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1580292911}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dd53129134c9aa4ca4dcd2d5f83f030, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::URDF.Research_3.Scripts.CollisionDetection
 --- !u!1001 &1604087461
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6264,6 +6466,7 @@ GameObject:
   - component: {fileID: 1864845994}
   - component: {fileID: 1864845993}
   - component: {fileID: 1864845992}
+  - component: {fileID: 1864845996}
   m_Layer: 0
   m_Name: fr3_link5
   m_TagString: Untagged
@@ -6402,6 +6605,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.Robotics.UrdfImporter::Unity.Robotics.UrdfImporter.UrdfLink
   IsBaseLink: 0
+--- !u!114 &1864845996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1864845990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dd53129134c9aa4ca4dcd2d5f83f030, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::URDF.Research_3.Scripts.CollisionDetection
 --- !u!1 &1874332310
 GameObject:
   m_ObjectHideFlags: 0
@@ -7026,6 +7241,7 @@ GameObject:
   - component: {fileID: 2011984990}
   - component: {fileID: 2011984989}
   - component: {fileID: 2011984988}
+  - component: {fileID: 2011984992}
   m_Layer: 0
   m_Name: fr3_link6
   m_TagString: Untagged
@@ -7164,6 +7380,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.Robotics.UrdfImporter::Unity.Robotics.UrdfImporter.UrdfLink
   IsBaseLink: 0
+--- !u!114 &2011984992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2011984986}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dd53129134c9aa4ca4dcd2d5f83f030, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::URDF.Research_3.Scripts.CollisionDetection
 --- !u!1 &2042216651
 GameObject:
   m_ObjectHideFlags: 8
@@ -7404,6 +7632,7 @@ Transform:
   m_Children:
   - {fileID: 775465364}
   - {fileID: 1611109209}
+  - {fileID: 1273061730}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!114 &2113401012
@@ -7489,6 +7718,6 @@ SceneRoots:
   - {fileID: 410087041}
   - {fileID: 832575519}
   - {fileID: 1247146834}
-  - {fileID: 1273061730}
+  - {fileID: 1063701010}
   - {fileID: 2113401011}
   - {fileID: 123057443}
