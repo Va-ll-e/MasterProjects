@@ -4,15 +4,15 @@ using RosMessageTypes.Sensor;
 using Unity.Robotics.ROSTCPConnector;
 using UnityEngine;
 
-namespace URDF.Research_3
+namespace URDF.Research_3.Scripts
 {
     public class Fr3Sync : MonoBehaviour
     {
         [SerializeField] private ROSConnection ros;
 
         private readonly Dictionary<string, ArticulationBody> _jointDict = new();
-
-        private double[] _linkPositions;
+        
+        private double[] positions;
         
         void Start()
         {
@@ -32,8 +32,7 @@ namespace URDF.Research_3
 
         void OnJointState(JointStateMsg msg)
         {
-            _linkPositions = msg.position;
-            
+            positions = msg.position;
             for (int i = 0; i < msg.name.Length; i++)
             {
                 var jointName = msg.name[i];
@@ -48,10 +47,10 @@ namespace URDF.Research_3
                 }
             }
         }
-        
-        public double[] GetLinkPositions()
+
+        public double[] GetPositions()
         {
-            return _linkPositions;
+            return positions;
         }
     }
 }

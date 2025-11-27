@@ -32,7 +32,7 @@ namespace URDF.Research_3.Scripts
             _lastCollisionTime = Time.time;
             Debug.Log($"COLLISION with {collision.gameObject.name} → EMERGENCY STOP SENT");
             
-            _emergencyStop.SendEmergencyStop();
+            _emergencyStop.TriggerEmergencyStop();
             
         }
     }
