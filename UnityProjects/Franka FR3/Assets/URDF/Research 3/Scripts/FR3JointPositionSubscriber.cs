@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using RosMessageTypes.Sensor;
 using Unity.Robotics.ROSTCPConnector;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace URDF.Research_3.Scripts
 {
     public class Fr3Sync : MonoBehaviour
     {
         [SerializeField] private ROSConnection ros;
+        [SerializeField] private UpdatePackagesReceived pr;
 
         private readonly Dictionary<string, ArticulationBody> _jointDict = new();
         
@@ -27,7 +29,6 @@ namespace URDF.Research_3.Scripts
             _jointDict.Add("fr3_joint5", GameObject.Find("fr3_link5").GetComponent<ArticulationBody>());
             _jointDict.Add("fr3_joint6", GameObject.Find("fr3_link6").GetComponent<ArticulationBody>());
             _jointDict.Add("fr3_joint7", GameObject.Find("fr3_link7").GetComponent<ArticulationBody>());
-            
         }
 
         void OnJointState(JointStateMsg msg)
@@ -46,7 +47,8 @@ namespace URDF.Research_3.Scripts
                     joint.xDrive = drive;
                 }
             }
-        }
+            pr.UpdatePackagesReceivedText();
+         }
 
         public double[] GetPositions()
         {
