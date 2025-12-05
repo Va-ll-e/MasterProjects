@@ -1,6 +1,6 @@
 # Master Projects
 
-[![Unity]([https://img.shields.io/badge/unity-2022.3%2B-black.svg?style=flat&logo=unity](https://img.shields.io/badge/Unity-100000?style=for-the-badge&logo=unity&logoColor=white))](https://unity.com/)
+[![Unity](https://img.shields.io/badge/unity-%23000000.svg?style=for-the-badge&logo=unity&logoColor=white)](https://unity.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This repository serves as the central hub for all the individual experiments, prototypes, and sub-projects that will eventually be combined into my final Master's project.
