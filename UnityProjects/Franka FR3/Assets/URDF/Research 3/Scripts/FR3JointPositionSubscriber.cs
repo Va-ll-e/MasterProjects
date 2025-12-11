@@ -14,12 +14,10 @@ namespace URDF.Research_3.Scripts
 
         private readonly Dictionary<string, ArticulationBody> _jointDict = new();
         
-        private double[] positions;
-        
         void Start()
         {
-            //subscribe to the /joint_states topic and for every received topic do OnJointState 
-            ros.Subscribe<JointStateMsg>("/joint_states", OnJointState);
+            
+            ros.Subscribe<JointStateMsg>("/joint_states_throttle", OnJointState);
             
             //Populate the Dictionary
             _jointDict.Add("fr3_joint1", GameObject.Find("fr3_link1").GetComponent<ArticulationBody>());
@@ -33,7 +31,6 @@ namespace URDF.Research_3.Scripts
 
         void OnJointState(JointStateMsg msg)
         {
-            positions = msg.position;
             for (int i = 0; i < msg.name.Length; i++)
             {
                 var jointName = msg.name[i];
@@ -42,17 +39,13 @@ namespace URDF.Research_3.Scripts
                 if (_jointDict.TryGetValue(jointName, out var joint))
                 {
                     var drive = joint.xDrive;
-                    var position = (float) Math.Round((float) msg.position[i]*180/Math.PI, 6);
+                    // 57.29 is 180/PI rounded
+                    var position = (float)(msg.position[i]*57.29);
                     drive.target = position;
                     joint.xDrive = drive;
                 }
             }
             pr.UpdatePackagesReceivedText();
          }
-
-        public double[] GetPositions()
-        {
-            return positions;
-        }
     }
 }
