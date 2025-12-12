@@ -17,7 +17,7 @@ namespace URDF.Research_3.Scripts
         void Start()
         {
             
-            ros.Subscribe<JointStateMsg>("/joint_states_throttle", OnJointState);
+            ros.Subscribe<JointStateMsg>("NS_1/joint_states_throttle", OnJointState);
             
             //Populate the Dictionary
             _jointDict.Add("fr3_joint1", GameObject.Find("fr3_link1").GetComponent<ArticulationBody>());

@@ -15,7 +15,7 @@ namespace URDF.Research_3.Scripts
         private void Start()
         {
             _ros = GetComponent<ROSConnection>();
-            _ros.RegisterPublisher<BoolMsg>("/emergency_stop");
+            _ros.RegisterPublisher<BoolMsg>("NS_1/emergency_stop");
             _stopMessage = new BoolMsg
             {
                 data = true
@@ -24,7 +24,7 @@ namespace URDF.Research_3.Scripts
         
         public void TriggerEmergencyStop()
         {
-            _ros.Publish("/emergency_stop", _stopMessage);
+            _ros.Publish("NS_1/emergency_stop", _stopMessage);
 
             Debug.Log("Triggering Emergency Stop");
         }
