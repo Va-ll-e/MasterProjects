@@ -1,12 +1,10 @@
-using System.Collections;
-using System.Runtime.InteropServices;
 using UnityEngine;
+using System.Runtime.InteropServices;
 
 public class ArucoDetector : MonoBehaviour
 {
-    // DLL Import - must be static extern inside class
+    // DLL Import
     [DllImport("OpenCVArUcoWrapper", CallingConvention = CallingConvention.Cdecl)]
-    
     private static extern int DetectArucoMarkers(
         byte[] imageData,
         int width,
@@ -20,72 +18,74 @@ public class ArucoDetector : MonoBehaviour
         float[] outRvecs);
 
     [Header("Setup")]
-    public GameObject digitalTwin;           // Drag your Franka robot prefab here
-    public float markerSizeMeters = 0.05f;   // Real size of your printed marker (e.g. 5 cm = 0.05)
-    public int targetMarkerId = 42;          // The ID of the marker you want to track
-    public GameObject targetMarker;
-    
-    [Header("Calibration - replace with real values later")]
+    public GameObject digitalTwin;           // Drag your Franka prefab here (make it a child of this camera!)
+    public float markerSizeMeters = 0.05f;   // Measure your real marker size!
+    public int targetMarkerId = 42;
+
+    [Header("Calibration - your real values")]
     private readonly float[] cameraMatrix = new float[9]
     {
-        1040.34510f,    0f,  838.193753f,     // fx, 0, cx   ← approximate for 1920x1080 webcam
-        0f,    1039.9049300f,  526.1639999f,     // 0, fy, cy
-        0f,       0f,    1f
+        1040.34510f,    0f,  838.192753f,
+        0f,          1039.90493f,  526.163999f,
+        0f,             0f,          1f
     };
 
     private readonly float[] distCoeffs = new float[5]
     {
-        0.184105721f,   // k1
-        -0.312982724f,   // k2
-        -0.000395015223f,// p1
-        0.000304874727f,// p2
-        0.194393586f     // k3
+        0.184105721f, -0.312982724f, -0.000395015223f,
+        0.000304874727f, 0.194393586f
     };
-    
-    
+
     // Buffers
     private const int MAX_MARKERS = 5;
     private int[] ids = new int[MAX_MARKERS];
     private float[] tvecs = new float[MAX_MARKERS * 3];
     private float[] rvecs = new float[MAX_MARKERS * 3];
 
-    // Webcam
-    private WebCamTexture webcamTexture;
-    private Texture2D readableTexture;  // temp copy for GetRawTextureData
+    // Passthrough capture
+    private RenderTexture passthroughRT;
+    private Texture2D readableTexture;
 
-    IEnumerator Start()
+    // Smoothing
+    private Vector3 smoothedPos = Vector3.zero;
+    private Quaternion smoothedRot = Quaternion.identity;
+    [Range(0.1f, 0.9f)] public float smoothFactor = 0.6f;  // higher = more responsive, lower = smoother
+
+    void Start()
     {
-        webcamTexture = new WebCamTexture(WebCamTexture.devices[0].name, 1920, 1080, 30);
-        webcamTexture.Play();
+        if (!GetComponent<Camera>())
+        {
+            Debug.LogError("ArucoDetector must be attached to a Camera (XR Main Camera)!");
+            enabled = false;
+            return;
+        }
 
-        // Wait until webcam is initialized
-        while (webcamTexture.width <= 16)
-            yield return null;
+        // Create capture textures (match your headset resolution or use a reasonable size)
+        passthroughRT = new RenderTexture(1920, 1080, 0, RenderTextureFormat.ARGB32);
+        passthroughRT.Create();
 
-        readableTexture = new Texture2D(
-            webcamTexture.width,
-            webcamTexture.height,
-            TextureFormat.RGBA32,
-            false);
-
-        targetMarker.GetComponent<Renderer>().material.mainTexture = webcamTexture;
+        readableTexture = new Texture2D(passthroughRT.width, passthroughRT.height, TextureFormat.RGBA32, false);
     }
 
-
-    void Update()
+    void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        if (!webcamTexture.isPlaying || !webcamTexture.didUpdateThisFrame)
+        if (!enabled) 
+        {
+            Graphics.Blit(source, destination);
             return;
+        }
 
-        // Copy webcam pixels to readable texture (required for GetRawTextureData)
-        readableTexture.SetPixels32(webcamTexture.GetPixels32());
+        // Capture current passthrough frame
+        Graphics.Blit(source, passthroughRT);
+
+        // Read pixels to CPU-readable texture
+        RenderTexture.active = passthroughRT;
+        readableTexture.ReadPixels(new Rect(0, 0, passthroughRT.width, passthroughRT.height), 0, 0);
         readableTexture.Apply();
 
-        // Get raw RGBA32 bytes
         byte[] rawData = readableTexture.GetRawTextureData<byte>().ToArray();
 
         int detectedCount;
-       // Debug.Log($"Frame size: {webcamTexture.width}x{webcamTexture.height}");
         int result = DetectArucoMarkers(
             rawData,
             readableTexture.width,
@@ -97,84 +97,65 @@ public class ArucoDetector : MonoBehaviour
             ids,
             tvecs,
             rvecs);
-       // Debug.Log($"DLL returned: {result}, detected: {detectedCount}");
 
         if (result > 0 && detectedCount > 0)
         {
-            // Check for your target marker (loop if you want all)
+            bool foundValid = false;
+
             for (int i = 0; i < detectedCount; i++)
             {
                 if (ids[i] == targetMarkerId)
                 {
-                    // Position: OpenCV tvec is right-handed → often flip Z for Unity
-                    Vector3 position = new Vector3(
-                        tvecs[i * 3 + 0],
-                        tvecs[i * 3 + 1],
-                        -tvecs[i * 3 + 2]);  // ← common flip
+                    Vector3 rawPos = new Vector3(tvecs[i*3+0], tvecs[i*3+1], -tvecs[i*3+2]);
+                    Vector3 rvec = new Vector3(rvecs[i*3+0], rvecs[i*3+1], rvecs[i*3+2]);
+                    Quaternion rawRot = RodriguesToQuaternion(rvec);
 
-                    const float MAX_REASONABLE_DISTANCE = 5f;   // meters
-                    const float MIN_REASONABLE_DISTANCE = 0.1f;
-
-                    // Rotation: rvec (Rodrigues) → Quaternion
-                    // Quick approx (improve later with full Rodrigues conversion)
-                    Vector3 rvec = new Vector3(
-                        rvecs[i * 3 + 0],
-                        rvecs[i * 3 + 1],
-                        rvecs[i * 3 + 2]);
-
-                    Quaternion rotation = RodriguesToQuaternion(rvec);
-
-                    if (!float.IsNaN(rotation.x) &&
-                        !float.IsNaN(position.x) && !float.IsNaN(position.y) && !float.IsNaN(position.z) &&
-                        Mathf.Abs(position.x) < MAX_REASONABLE_DISTANCE &&
-                        Mathf.Abs(position.y) < MAX_REASONABLE_DISTANCE &&
-                        position.z is >= MIN_REASONABLE_DISTANCE and <= MAX_REASONABLE_DISTANCE)
+                    // Safety bounds (tune these based on your room scale)
+                    if (!float.IsNaN(rawRot.x) &&
+                        Mathf.Abs(rawPos.x) < 10f && Mathf.Abs(rawPos.y) < 10f &&
+                        rawPos.z >= 0.05f && rawPos.z < 10f)
                     {
-                        digitalTwin.transform.localPosition = position;
-                        digitalTwin.transform.localRotation = rotation;
-                        Debug.Log($"VALID pose applied → Pos: {position}, Rot: {rotation.eulerAngles}");
-                    }
-                    else
-                    {
-                       // Debug.LogWarning($"Outlier pose rejected → Pos: {position} (likely numerical instability)");
-                    }
+                        // Smooth
+                        smoothedPos = Vector3.Lerp(smoothedPos, rawPos, smoothFactor);
+                        smoothedRot = Quaternion.Slerp(smoothedRot, rawRot, smoothFactor);
 
-                    //  Debug.Log($"Marker {targetMarkerId} detected! Pos: {position}");
-                    break;
+                        digitalTwin.transform.localPosition = smoothedPos;
+                        digitalTwin.transform.localRotation = smoothedRot;
+
+                        Debug.Log($"VALID overlay → Pos: {smoothedPos}, Rot: {smoothedRot.eulerAngles}");
+                        foundValid = true;
+                        break;
+                    }
                 }
             }
+
+            if (!foundValid)
+            {
+                Debug.Log("Detected marker but pose out of bounds - skipped");
+            }
         }
+
+        // Forward to display
+        Graphics.Blit(source, destination);
     }
 
-    // Simple Rodrigues → Quaternion conversion (add axis-angle logic)
     private Quaternion RodriguesToQuaternion(Vector3 rvec)
     {
         float angle = rvec.magnitude;
+        if (angle < 1e-5f) return Quaternion.identity;
 
-        // Handle near-zero rotation safely (common when marker is frontal)
-        if (angle < 1e-5f)  // very small threshold
-        {
-            return Quaternion.identity;  // no rotation
-        }
-
-        // Normalize axis safely
-        Vector3 axis = rvec / angle;  // divide by magnitude instead of .normalized
-
-        // Convert to degrees and create quaternion
+        Vector3 axis = rvec / angle;
         Quaternion rot = Quaternion.AngleAxis(angle * Mathf.Rad2Deg, axis);
 
-        // Optional: small safety clamp to avoid any floating-point weirdness
         if (float.IsNaN(rot.x) || float.IsNaN(rot.y) || float.IsNaN(rot.z) || float.IsNaN(rot.w))
-        {
-          //  Debug.LogWarning("NaN rotation detected - falling back to identity");
             return Quaternion.identity;
-        }
 
         return rot;
     }
 
     void OnDestroy()
     {
-        if (webcamTexture != null) webcamTexture.Stop();
+        if (passthroughRT != null) passthroughRT.Release();
+        if (readableTexture != null) Destroy(readableTexture);
     }
 }
