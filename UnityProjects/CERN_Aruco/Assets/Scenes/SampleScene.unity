@@ -213,9 +213,6 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 657184242118504722, guid: d6878e1999eb4b44a9f5a263af86c185, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1325005137}
-    - targetCorrespondingSourceObject: {fileID: 657184242118504722, guid: d6878e1999eb4b44a9f5a263af86c185, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 1325005136}
   m_SourcePrefab: {fileID: 100100000, guid: d6878e1999eb4b44a9f5a263af86c185, type: 3}
 --- !u!1 &1325005135 stripped
@@ -267,21 +264,51 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!114 &1325005137
+--- !u!1 &1677494100
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1677494102}
+  - component: {fileID: 1677494101}
+  m_Layer: 0
+  m_Name: ArucoDetection
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1677494101
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1325005135}
+  m_GameObject: {fileID: 1677494100}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 78f416e7ca273d94e9762a1e24b86bf7, type: 3}
+  m_Script: {fileID: 11500000, guid: c74f2039254c67e4e920ff064ce302da, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ArucoDetector
-  digitalTwin: {fileID: 2145924387}
-  markerSizeMeters: 0.05
-  targetMarkerId: 42
+  m_EditorClassIdentifier: Assembly-CSharp::TagDetection
+  box: {fileID: 2145924387}
+--- !u!4 &1677494102
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1677494100}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 10.35257, y: 1.31161, z: -4.84591}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1900725526
 GameObject:
   m_ObjectHideFlags: 0
@@ -489,7 +516,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b1678046410406541babc77108b5077c, type: 2}
+  - {fileID: 2100000, guid: 2ce8ef950ad64fe4ea38138854a77222, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -527,3 +554,4 @@ SceneRoots:
   - {fileID: 1900725529}
   - {fileID: 2145924388}
   - {fileID: 1325005133}
+  - {fileID: 1677494102}
