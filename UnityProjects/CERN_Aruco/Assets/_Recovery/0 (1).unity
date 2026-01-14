@@ -282,6 +282,7 @@ MonoBehaviour:
   digitalTwin: {fileID: 2145924387}
   markerSizeMeters: 0.05
   targetMarkerId: 42
+  smoothFactor: 0.6
 --- !u!1 &1900725526
 GameObject:
   m_ObjectHideFlags: 0

@@ -18,22 +18,22 @@ public class ArucoDetector : MonoBehaviour
         float[] outRvecs);
 
     [Header("Setup")]
-    public GameObject digitalTwin;           // Drag your Franka prefab here (make it a child of this camera!)
+    public GameObject digitalTwin;           // Drag your Franka prefab / Cube here (make it a child of this camera!)
     public float markerSizeMeters = 0.05f;   // Measure your real marker size!
     public int targetMarkerId = 42;
 
-    [Header("Calibration - your real values")]
+    [Header("Calibration - HoloLens values")]
     private readonly float[] cameraMatrix = new float[9]
     {
-        1040.34510f,    0f,  838.192753f,
-        0f,          1039.90493f,  526.163999f,
+        3405.77286f,    0f,  1940.72687f,
+        0f,          3400.28003f,  1103.21077f,
         0f,             0f,          1f
     };
 
     private readonly float[] distCoeffs = new float[5]
     {
-        0.184105721f, -0.312982724f, -0.000395015223f,
-        0.000304874727f, 0.194393586f
+        -0.220268529f, 5.85710669f, 0.00135260716f,
+        0.00316794067f, -26.9110395f
     };
 
     // Buffers
@@ -46,22 +46,34 @@ public class ArucoDetector : MonoBehaviour
     private RenderTexture passthroughRT;
     private Texture2D readableTexture;
 
-    // Smoothing
-    private Vector3 smoothedPos = Vector3.zero;
-    private Quaternion smoothedRot = Quaternion.identity;
-    [Range(0.1f, 0.9f)] public float smoothFactor = 0.6f;  // higher = more responsive, lower = smoother
+    // Color feedback
+    private Renderer twinRenderer;
+    private Color defaultColor = Color.green;
+    private Color detectedColor = Color.red;
+    private float lastDetectionTime = -10f;  // time of last valid detection
+    private const float RESET_DELAY = 1f;    // seconds without detection → revert to green
 
     void Start()
     {
         if (!GetComponent<Camera>())
         {
-            Debug.LogError("ArucoDetector must be attached to a Camera (XR Main Camera)!");
+            Debug.LogError("ArucoDetector must be on the XR Main Camera!");
             enabled = false;
             return;
         }
 
-        // Create capture textures (match your headset resolution or use a reasonable size)
-        passthroughRT = new RenderTexture(1920, 1080, 0, RenderTextureFormat.ARGB32);
+        // Cache renderer once
+        if (digitalTwin != null)
+        {
+            twinRenderer = digitalTwin.GetComponentInChildren<Renderer>(true);
+            if (twinRenderer == null)
+                Debug.LogError("Digital twin has no Renderer!");
+            else
+                twinRenderer.material.color = defaultColor;
+        }
+
+        // Capture setup - lower res for better performance on HoloLens
+        passthroughRT = new RenderTexture(1280, 720, 0, RenderTextureFormat.ARGB32);
         passthroughRT.Create();
 
         readableTexture = new Texture2D(passthroughRT.width, passthroughRT.height, TextureFormat.RGBA32, false);
@@ -69,16 +81,16 @@ public class ArucoDetector : MonoBehaviour
 
     void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        if (!enabled) 
+        if (!enabled)
         {
             Graphics.Blit(source, destination);
             return;
         }
 
-        // Capture current passthrough frame
+        // Capture passthrough
         Graphics.Blit(source, passthroughRT);
 
-        // Read pixels to CPU-readable texture
+        // CPU readback
         RenderTexture.active = passthroughRT;
         readableTexture.ReadPixels(new Rect(0, 0, passthroughRT.width, passthroughRT.height), 0, 0);
         readableTexture.Apply();
@@ -98,41 +110,38 @@ public class ArucoDetector : MonoBehaviour
             tvecs,
             rvecs);
 
+        bool tagDetectedThisFrame = false;
+
         if (result > 0 && detectedCount > 0)
         {
-            bool foundValid = false;
-
             for (int i = 0; i < detectedCount; i++)
             {
                 if (ids[i] == targetMarkerId)
                 {
-                    Vector3 rawPos = new Vector3(tvecs[i*3+0], tvecs[i*3+1], -tvecs[i*3+2]);
-                    Vector3 rvec = new Vector3(rvecs[i*3+0], rvecs[i*3+1], rvecs[i*3+2]);
-                    Quaternion rawRot = RodriguesToQuaternion(rvec);
+                    tagDetectedThisFrame = true;
+                    lastDetectionTime = Time.time;
 
-                    // Safety bounds (tune these based on your room scale)
-                    if (!float.IsNaN(rawRot.x) &&
-                        Mathf.Abs(rawPos.x) < 10f && Mathf.Abs(rawPos.y) < 10f &&
-                        rawPos.z >= 0.05f && rawPos.z < 10f)
-                    {
-                        // Smooth
-                        smoothedPos = Vector3.Lerp(smoothedPos, rawPos, smoothFactor);
-                        smoothedRot = Quaternion.Slerp(smoothedRot, rawRot, smoothFactor);
+                    // Optional: still apply pose if you want (comment out if only color matters)
+                    Vector3 position = new Vector3(tvecs[i*3+0], tvecs[i*3+1], -tvecs[i*3+2]);
+                    Quaternion rotation = RodriguesToQuaternion(new Vector3(rvecs[i*3+0], rvecs[i*3+1], rvecs[i*3+2]));
 
-                        digitalTwin.transform.localPosition = smoothedPos;
-                        digitalTwin.transform.localRotation = smoothedRot;
+                    if (twinRenderer != null)
+                        twinRenderer.material.color = detectedColor;
 
-                        Debug.Log($"VALID overlay → Pos: {smoothedPos}, Rot: {smoothedRot.eulerAngles}");
-                        foundValid = true;
-                        break;
-                    }
+                    // Uncomment if you want position update too:
+                    // digitalTwin.transform.localPosition = position;
+                    // digitalTwin.transform.localRotation = rotation;
+
+                    break;
                 }
             }
+        }
 
-            if (!foundValid)
-            {
-                Debug.Log("Detected marker but pose out of bounds - skipped");
-            }
+        // Reset color after delay if no tag seen recently
+        if (!tagDetectedThisFrame && Time.time - lastDetectionTime > RESET_DELAY)
+        {
+            if (twinRenderer != null)
+                twinRenderer.material.color = defaultColor;
         }
 
         // Forward to display
