@@ -1,0 +1,55 @@
+fileFormatVersion: 2
+guid: 23b2bdb351740ae4f9a3bf60f99d573a
+PluginImporter:
+  externalObjects: {}
+  serializedVersion: 3
+  iconMap: {}
+  executionOrder: {}
+  defineConstraints: []
+  isPreloaded: 0
+  isOverridable: 0
+  isExplicitlyReferenced: 0
+  validateReferences: 1
+  platformData:
+    Any:
+      enabled: 0
+      settings:
+        Exclude Editor: 1
+        Exclude Linux64: 0
+        Exclude OSXUniversal: 0
+        Exclude Win: 0
+        Exclude Win64: 0
+        Exclude WindowsStoreApps: 0
+    Editor:
+      enabled: 0
+      settings:
+        CPU: ARM64
+        DefaultValueInitialized: true
+        OS: AnyOS
+    Linux64:
+      enabled: 1
+      settings:
+        CPU: None
+    OSXUniversal:
+      enabled: 1
+      settings:
+        CPU: ARM64
+    Win:
+      enabled: 1
+      settings:
+        CPU: None
+    Win64:
+      enabled: 1
+      settings:
+        CPU: ARM64
+    WindowsStoreApps:
+      enabled: 1
+      settings:
+        CPU: ARM64
+        DontProcess: false
+        PlaceholderPath: 
+        SDK: UWP
+        ScriptingBackend: Il2Cpp
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

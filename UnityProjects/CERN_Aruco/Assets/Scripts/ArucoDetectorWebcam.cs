@@ -17,7 +17,8 @@ public class ArucoDetectorWebcam : MonoBehaviour
         out int idsCount,
         int[] outIds,
         float[] outTvecs,
-        float[] outRvecs);
+        float[] outRvecs
+        );
 
     [Header("Setup")]
     public GameObject digitalTwin;           // Drag your Franka robot prefab here
