@@ -16,10 +16,9 @@ MonoBehaviour:
   Values:
   - featureSets:
     - com.meta.openxr.featureset.metaxr
-    - com.unity.openxr.featureset.meta
   - featureSets:
     - com.meta.openxr.featureset.metaxr
-    - com.unity.openxr.featureset.meta
+    - com.htc.vive.openxr.featureset.vivexr
   - featureSets:
     - com.microsoft.openxr.featureset.hololens
   m_vulkanAdditionalGraphicsQueue: 0

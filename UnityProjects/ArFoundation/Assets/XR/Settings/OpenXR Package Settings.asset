@@ -181,6 +181,7 @@ MonoBehaviour:
   - {fileID: 7372753223709263003}
   - {fileID: -4823629654139625158}
   - {fileID: -8988934853377299912}
+  - {fileID: 3747699039171382934}
   - {fileID: -2168016855716080019}
   - {fileID: -7319348129269805772}
   - {fileID: 453745167969508816}
@@ -555,6 +556,7 @@ MonoBehaviour:
   - {fileID: 8362122330227808413}
   - {fileID: 7503879148463771178}
   - {fileID: -7252496765035572212}
+  - {fileID: -1784083814910755721}
   - {fileID: 4221013634496410607}
   - {fileID: 3786458032092782614}
   - {fileID: 3262068258121380956}
@@ -732,7 +734,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78bb1f33f93dd034d90b1d1a27a5eb27, type: 3}
   m_Name: VivePassthrough Standalone
   m_EditorClassIdentifier: VIVE.OpenXR::VIVE.OpenXR.Passthrough.VivePassthrough
-  m_enabled: 0
+  m_enabled: 1
   nameUi: VIVE XR Passthrough
   version: 1.0.0
   featureIdInternal: vive.openxr.feature.passthrough
@@ -924,6 +926,31 @@ MonoBehaviour:
   targetOpenXRApiVersion: 
   required: 0
   customRuntimeLoaderName: 
+--- !u!114 &-4051973628252528771
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 773cfc63f8eb6744cb2c69c6d6a4cbf8, type: 3}
+  m_Name: MeshingTeapotFeature Android
+  m_EditorClassIdentifier: HTC.VIVE.OPENXR.SceneUnderstandingSample::UnityEngine.XR.OpenXR.Samples.MeshingFeature.MeshingTeapotFeature
+  m_enabled: 0
+  nameUi: Meshing Subsystem
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.example.meshing
+  openxrExtensionStrings: 
+  company: HTC
+  priority: 0
+  targetOpenXRApiVersion: 
+  required: 0
+  customRuntimeLoaderName: 
+  m_XrInstance: 0
+  m_XrSession: 0
+  m_systemid: 0
 --- !u!114 &-3795387408852196460
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1014,7 +1041,7 @@ MonoBehaviour:
   targetOpenXRApiVersion: 
   required: 0
   customRuntimeLoaderName: 
-  m_XrInstance: 2092405971008
+  m_XrInstance: 3271953660032
   m_XrSession: 0
   m_systemid: 0
 --- !u!114 &-3277865229819129837
@@ -1196,6 +1223,31 @@ MonoBehaviour:
   targetOpenXRApiVersion: 
   required: 0
   customRuntimeLoaderName: 
+--- !u!114 &-1784083814910755721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 773cfc63f8eb6744cb2c69c6d6a4cbf8, type: 3}
+  m_Name: MeshingTeapotFeature Standalone
+  m_EditorClassIdentifier: HTC.VIVE.OPENXR.SceneUnderstandingSample::UnityEngine.XR.OpenXR.Samples.MeshingFeature.MeshingTeapotFeature
+  m_enabled: 0
+  nameUi: Meshing Subsystem
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.example.meshing
+  openxrExtensionStrings: 
+  company: HTC
+  priority: 0
+  targetOpenXRApiVersion: 
+  required: 0
+  customRuntimeLoaderName: 
+  m_XrInstance: 0
+  m_XrSession: 0
+  m_systemid: 0
 --- !u!114 &-1373786541560190208
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1473,7 +1525,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe9ba5ccf170d54478c5df33f98aabc5, type: 3}
   m_Name: VIVEFocus3Profile Standalone
   m_EditorClassIdentifier: VIVE.OpenXR::VIVE.OpenXR.VIVEFocus3Profile
-  m_enabled: 0
+  m_enabled: 1
   nameUi: VIVE Focus 3 Controller Interaction
   version: 1.0.0
   featureIdInternal: vive.openxr.feature.focus3controller
@@ -1571,6 +1623,7 @@ MonoBehaviour:
   - {fileID: 5202961199759827062}
   - {fileID: 8919390261368329218}
   - {fileID: -765992151087659899}
+  - {fileID: -4051973628252528771}
   - {fileID: 3422926588643353131}
   - {fileID: 4134817292438456738}
   - {fileID: 7116249997478989831}
@@ -1751,7 +1804,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe9ba5ccf170d54478c5df33f98aabc5, type: 3}
   m_Name: VIVEFocus3Profile Android
   m_EditorClassIdentifier: VIVE.OpenXR::VIVE.OpenXR.VIVEFocus3Profile
-  m_enabled: 0
+  m_enabled: 1
   nameUi: VIVE Focus 3 Controller Interaction
   version: 1.0.0
   featureIdInternal: vive.openxr.feature.focus3controller
@@ -1961,6 +2014,31 @@ MonoBehaviour:
   targetOpenXRApiVersion: 
   required: 0
   customRuntimeLoaderName: 
+--- !u!114 &3747699039171382934
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 773cfc63f8eb6744cb2c69c6d6a4cbf8, type: 3}
+  m_Name: MeshingTeapotFeature Metro
+  m_EditorClassIdentifier: HTC.VIVE.OPENXR.SceneUnderstandingSample::UnityEngine.XR.OpenXR.Samples.MeshingFeature.MeshingTeapotFeature
+  m_enabled: 0
+  nameUi: Meshing Subsystem
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.example.meshing
+  openxrExtensionStrings: 
+  company: HTC
+  priority: 0
+  targetOpenXRApiVersion: 
+  required: 0
+  customRuntimeLoaderName: 
+  m_XrInstance: 0
+  m_XrSession: 0
+  m_systemid: 0
 --- !u!114 &3786458032092782614
 MonoBehaviour:
   m_ObjectHideFlags: 0

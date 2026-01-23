@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.XR.OpenXR.Editor::UnityEditor.XR.OpenXR.OpenXREditorSettings
   Keys: 010000000e00000007000000
   Values:
-  - featureSets:
-    - com.microsoft.openxr.featureset.wmr
+  - featureSets: []
   - featureSets:
     - com.microsoft.openxr.featureset.hololens
   - featureSets:
