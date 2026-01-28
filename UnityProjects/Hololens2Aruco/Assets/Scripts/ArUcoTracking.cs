@@ -1,27 +1,32 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
+using TMPro;
 
 // For main thread safety
 
 #if ENABLE_WINMD_SUPPORT
 using Windows.Graphics.Imaging;
 using Microsoft.MixedReality.OpenXR;
-using OpenCVBridge;
 using System.Threading.Tasks;
+using OpenCVBridge;
 #endif
 
 public class ArUcoTracking : MonoBehaviour
 {
+    public TextMeshPro HUD;                                         // Hud to display the current status
     public float markerSize;                                        // Size of the printed aruco marker's side in meters
     public ArUcoUtils.ArUcoDictionary arUcoDictionary;              // The ArUco dictionary the marker is generated from
-    public int markerId = 42;                                       // The Marker that you want to detect
-    public GameObject digitalTwin;                                  // Game object that is rendered on top of detected markers
+    public GameObject markerGo;                                     // Game object that is rendered on top of detected markers
+    public CameraUtils.MediaCaptureProfiles mediaCaptureProfile;    // Allows the selection of camera capture profiles with different resolutions || HL2_896x504 should be used!
+    public bool autoReleaseMarkerGos;                               // After a preset time, every instance of the markerGo will be removed
     public bool useCustomCameraIntrinsics;                          // Enables custom camera calibration parameters instead of quierying it from frames
-    public CameraIntrinsics customCameraIntrinsics;                 // Holds the user defined calibration data Values
+    public CameraIntrinsics customCameraIntrinsics;                 // Holds the user defined calibration data
 
+    List<GameObject> _markerGos = new List<GameObject>();
+    int frameCounter = 0;
     bool _isRunning = false;
+    CameraIntrinsics perFrameCameraIntrinsics;
     CameraIntrinsics _cameraIntrinsics;
 
 #if ENABLE_WINMD_SUPPORT
@@ -46,22 +51,50 @@ public class ArUcoTracking : MonoBehaviour
     {
         try
         {
-            // Set digital twins size & disable until markers detected
-            if (digitalTwin == null)
+            if (HUD == null)
             {
-                Debug.LogError("Digital Twin not assigned — create a prefab and assign it.");
+                Debug.LogError("HUD not assigned — create a TextMeshPro and assign it.");
                 return;
             }
 
-            digitalTwin.transform.localScale = new Vector3(markerSize, markerSize, markerSize);
-            digitalTwin.SetActive(false);
+            HUD.text = "Initializing ...";
 
-            // Setup media capture specs
-            // Recommended width=896, height=504, frameRate=30.
-            int width = 896;
-            int height = 504;
+            // Set markerGo's size & disable until markers detected
+            if (markerGo == null)
+            {
+                Debug.LogError("markerGo not assigned — create a prefab and assign it.");
+                return;
+            }
+
+            markerGo.transform.localScale = new Vector3(markerSize, markerSize, markerSize);
+            markerGo.SetActive(false);
+
+            // Setup mediacapture specs
+            int width = 0;
+            int height = 0;
             int frameRate = 30;
-            
+
+            switch (mediaCaptureProfile)
+            {
+                case CameraUtils.MediaCaptureProfiles.HL2_2272x1278:
+                    width = 2272;
+                    height = 1278;
+                    break;
+                case CameraUtils.MediaCaptureProfiles.HL2_896x504:
+                    width = 896;
+                    height = 504;
+                    break;
+
+                case CameraUtils.MediaCaptureProfiles.HL2_1280x720:
+                    width = 1280;
+                    height = 720;
+                    break;
+
+                default:
+                    width = 0;
+                    height = 0;
+                    break;
+            }
 
 #if ENABLE_WINMD_SUPPORT
             try
@@ -70,10 +103,12 @@ public class ArUcoTracking : MonoBehaviour
 
                 _mediaCapturer = new MediaCapturer();
                 await _mediaCapturer.StartCapture(width, height, frameRate);
+
+                HUD.text = "Camera started. Running!";
             }
             catch (Exception ex)
             {
-                Debug.LogError("Failed to start camera: " + ex.Message);
+                HUD.text = "Failed to start camera: " + ex.Message;
             }
 
             // Run processing loop in separate parallel Task
@@ -99,8 +134,26 @@ public class ArUcoTracking : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Debug.LogError("Task failed: " + ex.Message);
+            if (HUD != null) HUD.text = "Task failed: " + ex.Message;
+            Debug.LogError("Startup error: " + ex);
         }
+    }
+
+    private void Update()
+    {
+        if (frameCounter == 30)
+        {
+            if (autoReleaseMarkerGos)
+            {
+                for (int i = 0; i < _markerGos.Count; i++)
+                {
+                    GameObject.Destroy(_markerGos[i]);
+                }
+                _markerGos.Clear();
+            }
+            frameCounter = 0;
+        }
+        frameCounter++;
     }
 
     private async void OnApplicationFocus(bool focus)
@@ -158,14 +211,12 @@ public class ArUcoTracking : MonoBehaviour
                         (int)arUcoDictionary,
                         markerSize,
                         out frameProcessingTime);
-        
+
         if (markers.Count != 0)
         {
-            // Iterate through the detected markers & place digital twin
+            // Iterate through the detected markers & place markerGos
             foreach (var marker in markers)
             {
-                if (marker.Id() != markerId) continue;
-                
                 UnityEngine.Vector3 translationUnity = ArUcoUtils.Vec3FromFloat3(marker.Position());
                 UnityEngine.Vector3 rotationRodrigues = ArUcoUtils.Vec3FromFloat3(marker.Rotation());
                 UnityEngine.Quaternion rotationUnity = ArUcoUtils.RotationQuatFromRodrigues(rotationRodrigues);
@@ -184,14 +235,49 @@ public class ArUcoTracking : MonoBehaviour
                 UnityEngine.Vector3 markerPos = ArUcoUtils.GetVectorFromMatrix(transformUnityWorld);
                 UnityEngine.Quaternion markerRot = ArUcoUtils.GetQuatFromMatrix(transformUnityWorld);
 
-                // Place/update digital twin
-                digitalTwin.transform.SetPositionAndRotation(markerPos, markerRot);
-                digitalTwin.SetActive(true);
+                // Update UI with detections
+                UnityEngine.WSA.Application.InvokeOnAppThread(() =>
+                {
+                    HUD.text = "Detected " + markers.Count + " markers" +
+                    "\nLast camera frame processed in " + frameProcessingTime + " ms";
+
+                    string markerText = "[Marker " + marker.Id() + "]";
+                    string markerName = "marker" + marker.Id();
+
+                    var instance = GameObject.Find(markerName);
+
+                    if (instance != null)
+                    {
+                        // Update existing markerGo's position 
+                        instance.transform.SetPositionAndRotation(markerPos, markerRot);
+                    }
+                    else
+                    {
+                        // Create a new instance of the markerGo to represent the marker
+                        var newInstance = Instantiate(markerGo, markerPos, markerRot);
+                        newInstance.name = markerName;
+                        var tmp = newInstance.GetComponentInChildren<TextMeshProUGUI>();
+                        if (tmp != null)
+                            tmp.SetText(markerText);
+                        else
+                            Debug.LogError("TextMeshProUGUI not found on markerGo prefab — add one.");
+                        newInstance.SetActive(true);
+                        _markerGos.Add(newInstance);
+                    }
+
+                    Debug.Log("marker [" + marker.Id() + "] pos xyz: " + markerPos.x + " " + markerPos.y + " " + markerPos.z);
+
+                }, false);
             }
         }
         else
         {
-            digitalTwin.SetActive(false);
+            // Update UI
+            UnityEngine.WSA.Application.InvokeOnAppThread(() =>
+            {
+                HUD.text = "Detected " + markers.Count + " markers" +
+                    "\nLast camera frame processed in " + frameProcessingTime + " ms";
+            }, false);
         }
     }
 #endif

@@ -9,7 +9,7 @@
 [Aa]pp/
 *[Bb]uild/
 *[Ll]ibrary/
-/[Tt]emp/
+*[Tt]emp/
 /[Oo]bj/
 *[Bb]uild/
 /[Bb]uild/
