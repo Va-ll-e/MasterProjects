@@ -1,0 +1,88 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!181963792 &2655988077585873504
+Preset:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: ArUcoTracking_Hololens2
+  m_TargetType:
+    m_NativeTypeID: 114
+    m_ManagedTypePPtr: {fileID: 11500000, guid: 405242ac48e62054babcb2d1236e25d2, type: 3}
+    m_ManagedTypeFallback: 
+  m_Properties:
+  - target: {fileID: 0}
+    propertyPath: m_Enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorHideFlags
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorClassIdentifier
+    value: Assembly-CSharp::ArUcoTracking
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: markerSize
+    value: 0.075
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: arUcoDictionary
+    value: 9
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: markerId
+    value: 42
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: digitalTwin
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: useCustomCameraIntrinsics
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: customCameraIntrinsics.focalLength.x
+    value: 692.6422
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: customCameraIntrinsics.focalLength.y
+    value: 693.1416
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: customCameraIntrinsics.principalPoint.x
+    value: 439.4484
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: customCameraIntrinsics.principalPoint.y
+    value: 238.6071
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: customCameraIntrinsics.radialDistortion.x
+    value: -0.01862742
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: customCameraIntrinsics.radialDistortion.y
+    value: 0.7293355
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: customCameraIntrinsics.radialDistortion.z
+    value: -2.991346
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: customCameraIntrinsics.tangentialDistortion.x
+    value: -0.001943871
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: customCameraIntrinsics.tangentialDistortion.y
+    value: 0.0008217751
+    objectReference: {fileID: 0}
+  m_ExcludedProperties: []
+  m_CoupledType:
+    m_NativeTypeID: 0
+    m_ManagedTypePPtr: {fileID: 0}
+    m_ManagedTypeFallback: 
+  m_CoupledProperties: []

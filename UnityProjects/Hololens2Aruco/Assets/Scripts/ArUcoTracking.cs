@@ -1,0 +1,226 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Serialization;
+
+// For main thread safety
+
+#if ENABLE_WINMD_SUPPORT
+using Windows.Graphics.Imaging;
+using Microsoft.MixedReality.OpenXR;
+using OpenCVBridge;
+using System.Threading.Tasks;
+#endif
+
+public class ArUcoTracking : MonoBehaviour
+{
+    public float markerSize;                                        // Size of the printed aruco marker's side in meters
+    public ArUcoUtils.ArUcoDictionary arUcoDictionary;              // The ArUco dictionary the marker is generated from
+    public int markerId = 42;                                       // The Marker that you want to detect
+    public GameObject digitalTwin;                                  // Game object that is rendered on top of detected markers
+    public bool useCustomCameraIntrinsics;                          // Enables custom camera calibration parameters instead of quierying it from frames
+    public CameraIntrinsics customCameraIntrinsics;                 // Holds the user defined calibration data Values
+
+    bool _isRunning = false;
+    CameraIntrinsics _cameraIntrinsics;
+
+#if ENABLE_WINMD_SUPPORT
+    OpenCVHelper _cvHelper = null;
+    MediaCapturer _mediaCapturer = null;
+
+    Windows.Perception.Spatial.SpatialCoordinateSystem _unityCoordinateSystem = null;
+    Windows.Perception.Spatial.SpatialCoordinateSystem _frameCoordinateSystem = null;
+#endif
+
+    // Awake is called when an enabled script instance is being loaded
+    private void Awake()
+    {
+        
+#if ENABLE_WINMD_SUPPORT
+       _unityCoordinateSystem = PerceptionInterop.GetSceneCoordinateSystem(UnityEngine.Pose.identity) as Windows.Perception.Spatial.SpatialCoordinateSystem;
+#endif
+    }
+
+    // Start is called before the first frame update
+    async void Start()
+    {
+        try
+        {
+            // Set digital twins size & disable until markers detected
+            if (digitalTwin == null)
+            {
+                Debug.LogError("Digital Twin not assigned — create a prefab and assign it.");
+                return;
+            }
+
+            digitalTwin.transform.localScale = new Vector3(markerSize, markerSize, markerSize);
+            digitalTwin.SetActive(false);
+
+            // Setup media capture specs
+            // Recommended width=896, height=504, frameRate=30.
+            int width = 896;
+            int height = 504;
+            int frameRate = 30;
+            
+
+#if ENABLE_WINMD_SUPPORT
+            try
+            {
+                _cvHelper = new OpenCVHelper();
+
+                _mediaCapturer = new MediaCapturer();
+                await _mediaCapturer.StartCapture(width, height, frameRate);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError("Failed to start camera: " + ex.Message);
+            }
+
+            // Run processing loop in separate parallel Task
+            _isRunning = true;
+
+            await Task.Run(async () =>
+            {
+                while (_isRunning)
+                {
+                    if (_mediaCapturer.IsCapturing)
+                    {
+                        var mediaFrameReference = _mediaCapturer.GetLatestFrameRef();
+                        HandleArUcoTracking(mediaFrameReference);
+                        mediaFrameReference?.Dispose();
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+            });
+#endif
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("Task failed: " + ex.Message);
+        }
+    }
+
+    private async void OnApplicationFocus(bool focus)
+    {
+#if ENABLE_WINMD_SUPPORT
+       if (!focus) await _mediaCapturer.StopCapturing();
+#endif
+    }
+
+#if ENABLE_WINMD_SUPPORT
+    private void HandleArUcoTracking(Windows.Media.Capture.Frames.MediaFrameReference mediaFrameReference)
+    {
+        // Request software bitmap from media frame reference
+        var softwareBitmap = mediaFrameReference?.VideoMediaFrame?.SoftwareBitmap;
+
+        // Request camera intrinsics from media frame reference
+        var pFIntrinsics = mediaFrameReference?.VideoMediaFrame?.CameraIntrinsics;
+
+        if (!useCustomCameraIntrinsics && pFIntrinsics != null)
+        {
+            // Handle per-frame intrinsics
+            _cameraIntrinsics.focalLength = VectorExtensions.ToUnity(pFIntrinsics.FocalLength);
+            _cameraIntrinsics.principalPoint = VectorExtensions.ToUnity(pFIntrinsics.PrincipalPoint);
+            _cameraIntrinsics.radialDistortion = VectorExtensions.ToUnity(pFIntrinsics.RadialDistortion);
+            _cameraIntrinsics.tangentialDistortion = VectorExtensions.ToUnity(pFIntrinsics.TangentialDistortion);
+        }
+        else
+        {
+            _cameraIntrinsics = customCameraIntrinsics;
+        }
+
+        if (softwareBitmap != null)
+        {
+            // Cache frame coordinate system
+            _frameCoordinateSystem = mediaFrameReference.CoordinateSystem;
+
+            DetectMarkers(softwareBitmap, _cameraIntrinsics);
+        }
+
+        // Dispose of the bitmap
+        softwareBitmap?.Dispose();
+    }
+
+    private void DetectMarkers(SoftwareBitmap softwareBitmap, CameraIntrinsics intrinsics)
+    {
+        int frameProcessingTime = 0;
+
+        // Process softwarebitmap with OpenCV
+        var markers = _cvHelper.ProcessWithArUco(
+                        softwareBitmap, 
+                        VectorExtensions.ToNumerics(intrinsics.focalLength), 
+                        VectorExtensions.ToNumerics(intrinsics.principalPoint), 
+                        VectorExtensions.ToNumerics(intrinsics.radialDistortion), 
+                        VectorExtensions.ToNumerics(intrinsics.tangentialDistortion),
+                        (int)arUcoDictionary,
+                        markerSize,
+                        out frameProcessingTime);
+        
+        if (markers.Count != 0)
+        {
+            // Iterate through the detected markers & place digital twin
+            foreach (var marker in markers)
+            {
+                if (marker.Id() != markerId) continue;
+                
+                UnityEngine.Vector3 translationUnity = ArUcoUtils.Vec3FromFloat3(marker.Position());
+                UnityEngine.Vector3 rotationRodrigues = ArUcoUtils.Vec3FromFloat3(marker.Rotation());
+                UnityEngine.Quaternion rotationUnity = ArUcoUtils.RotationQuatFromRodrigues(rotationRodrigues);
+
+                UnityEngine.Matrix4x4 markerTransformUnityCamera = ArUcoUtils.GetTransformInUnityCamera(translationUnity, rotationUnity);
+                UnityEngine.Matrix4x4 cameraToWorldUnity = CameraUtils.GetViewToUnityTransform(_frameCoordinateSystem, _unityCoordinateSystem);
+
+                if (cameraToWorldUnity == null)
+                {
+                    Debug.LogError("cameraToWorldUnity is null — check _frameCoordinateSystem or _unityCoordinateSystem.");
+                    return;
+                }
+
+                UnityEngine.Matrix4x4 transformUnityWorld = cameraToWorldUnity * markerTransformUnityCamera;
+
+                UnityEngine.Vector3 markerPos = ArUcoUtils.GetVectorFromMatrix(transformUnityWorld);
+                UnityEngine.Quaternion markerRot = ArUcoUtils.GetQuatFromMatrix(transformUnityWorld);
+
+                // Place/update digital twin
+                digitalTwin.transform.SetPositionAndRotation(markerPos, markerRot);
+                digitalTwin.SetActive(true);
+            }
+        }
+        else
+        {
+            digitalTwin.SetActive(false);
+        }
+    }
+#endif
+}
+
+// ... (keep the CameraIntrinsics class and VectorExtensions as is from the original script)
+
+// Unity engine vector version of camera intrinsics class
+// System.Numerics is not supported in the inspector ...
+// variables must be converted to System.Numerics before passed to winRT
+[Serializable]
+public class CameraIntrinsics
+{
+    public UnityEngine.Vector2 focalLength;
+    public UnityEngine.Vector2 principalPoint;
+    public UnityEngine.Vector3 radialDistortion;
+    public UnityEngine.Vector2 tangentialDistortion;
+    // public int imageWidth;
+    // public int imageHeight;
+}
+
+// https://stackoverflow.com/questions/76442537/is-there-a-way-to-define-cast-from-system-numerics-vector2-to-unityengine-vector
+// https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/extension-methods
+public static class VectorExtensions
+{
+    public static UnityEngine.Vector2 ToUnity(this System.Numerics.Vector2 vec) => new UnityEngine.Vector2(vec.X, vec.Y);
+    public static System.Numerics.Vector2 ToNumerics(this UnityEngine.Vector2 vec) => new System.Numerics.Vector2(vec.x, vec.y);
+
+    public static UnityEngine.Vector3 ToUnity(this System.Numerics.Vector3 vec) => new UnityEngine.Vector3(vec.X, vec.Y, vec.Z);
+    public static System.Numerics.Vector3 ToNumerics(this UnityEngine.Vector3 vec) => new System.Numerics.Vector3(vec.x, vec.y, vec.z);
+}
+
