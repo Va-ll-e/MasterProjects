@@ -795,10 +795,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 405242ac48e62054babcb2d1236e25d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ArUcoTracking
-  markerSize: 0.066
-  arUcoDictionary: 9
+  markerSize: 0.075
   markerGo: {fileID: 43192141}
-  mediaCaptureProfile: 1
   autoReleaseMarkerGos: 1
   useCustomCameraIntrinsics: 1
   customCameraIntrinsics:

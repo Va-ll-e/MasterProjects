@@ -15,14 +15,13 @@ using OpenCVBridge;
 public class ArUcoTracking : MonoBehaviour
 {
     public float markerSize;                                        // Size of the printed aruco marker's side in meters
-    public ArUcoUtils.ArUcoDictionary arUcoDictionary;              // The ArUco dictionary the marker is generated from
     public GameObject markerGo;                                     // Game object that is rendered on top of detected markers
-    public CameraUtils.MediaCaptureProfiles mediaCaptureProfile;    // Allows the selection of camera capture profiles with different resolutions || HL2_896x504 should be used!
     public bool autoReleaseMarkerGos;                               // After a preset time, every instance of the markerGo will be removed
     public bool useCustomCameraIntrinsics;                          // Enables custom camera calibration parameters instead of quierying it from frames
     public CameraIntrinsics customCameraIntrinsics;                 // Holds the user defined calibration data
     
-    List<GameObject> _markerGos = new List<GameObject>();
+    private ArUcoUtils.ArUcoDictionary arUcoDictionary = ArUcoUtils.ArUcoDictionary.DICT_4X4_50;    // The ArUco dictionary the marker is generated from
+    private List<GameObject> _markerGos = new List<GameObject>();
     int frameCounter = 0;
     bool _isRunning = false;
     CameraIntrinsics perFrameCameraIntrinsics;
