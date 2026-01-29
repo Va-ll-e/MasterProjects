@@ -22,7 +22,7 @@ public class ArUcoTracking : MonoBehaviour
     public bool autoReleaseMarkerGos;                               // After a preset time, every instance of the markerGo will be removed
     public bool useCustomCameraIntrinsics;                          // Enables custom camera calibration parameters instead of quierying it from frames
     public CameraIntrinsics customCameraIntrinsics;                 // Holds the user defined calibration data
-
+    
     List<GameObject> _markerGos = new List<GameObject>();
     int frameCounter = 0;
     bool _isRunning = false;
