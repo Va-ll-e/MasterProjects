@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using TMPro;
 
@@ -72,32 +73,18 @@ public class ArUcoTracking : MonoBehaviour
                 _mediaCapturer = new MediaCapturer();
                 await _mediaCapturer.StartCapture(width, height, frameRate);
 
+                RunArUcoTracking();
+
+                Debug.Log("ArUco tracking stopped.");
             }
             catch (Exception ex)
             {
-                //
+                Debug.LogException(ex);
             }
-
-            // Run processing loop in separate parallel Task
-            _isRunning = true;
-
-            await Task.Run(async () =>
-            {
-                while (_isRunning)
-                {
-                    if (_mediaCapturer.IsCapturing)
-                    {
-                        var mediaFrameReference = _mediaCapturer.GetLatestFrameRef();
-                        HandleArUcoTracking(mediaFrameReference);
-                        mediaFrameReference?.Dispose();
-                    }
-                    else
-                    {
-                        return;
-                    }
-                }
-            });
 #endif
+            
+            
+            
         }
         catch (Exception ex)
         {
@@ -128,6 +115,36 @@ public class ArUcoTracking : MonoBehaviour
        if (!focus) await _mediaCapturer.StopCapturing();
 #endif
     }
+
+
+#if ENABLE_WINMD_SUPPORT
+    // Run processing loop in separate parallel Task
+    public async void RunArUcoTracking() {
+    _isRunning = true;
+
+        await Task.Run(async () =>
+            {
+                while (_isRunning)
+                {
+                    if (_mediaCapturer.IsCapturing)
+                    {
+                        var mediaFrameReference = _mediaCapturer.GetLatestFrameRef();
+                        HandleArUcoTracking(mediaFrameReference);
+                        mediaFrameReference?.Dispose();
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+            });
+    }
+    
+    public void StopArUcoTracking() {
+        _isRunning = false;
+    }
+            
+#endif
 
 #if ENABLE_WINMD_SUPPORT
     private void HandleArUcoTracking(Windows.Media.Capture.Frames.MediaFrameReference mediaFrameReference)
