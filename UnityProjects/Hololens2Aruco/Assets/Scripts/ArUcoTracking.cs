@@ -14,7 +14,6 @@ using OpenCVBridge;
 
 public class ArUcoTracking : MonoBehaviour
 {
-    public TextMeshPro HUD;                                         // Hud to display the current status
     public float markerSize;                                        // Size of the printed aruco marker's side in meters
     public ArUcoUtils.ArUcoDictionary arUcoDictionary;              // The ArUco dictionary the marker is generated from
     public GameObject markerGo;                                     // Game object that is rendered on top of detected markers
@@ -51,14 +50,6 @@ public class ArUcoTracking : MonoBehaviour
     {
         try
         {
-            if (HUD == null)
-            {
-                Debug.LogError("HUD not assigned — create a TextMeshPro and assign it.");
-                return;
-            }
-
-            HUD.text = "Initializing ...";
-
             // Set markerGo's size & disable until markers detected
             if (markerGo == null)
             {
@@ -104,11 +95,10 @@ public class ArUcoTracking : MonoBehaviour
                 _mediaCapturer = new MediaCapturer();
                 await _mediaCapturer.StartCapture(width, height, frameRate);
 
-                HUD.text = "Camera started. Running!";
             }
             catch (Exception ex)
             {
-                HUD.text = "Failed to start camera: " + ex.Message;
+                //
             }
 
             // Run processing loop in separate parallel Task
@@ -134,7 +124,6 @@ public class ArUcoTracking : MonoBehaviour
         }
         catch (Exception ex)
         {
-            if (HUD != null) HUD.text = "Task failed: " + ex.Message;
             Debug.LogError("Startup error: " + ex);
         }
     }
@@ -235,13 +224,9 @@ public class ArUcoTracking : MonoBehaviour
                 UnityEngine.Vector3 markerPos = ArUcoUtils.GetVectorFromMatrix(transformUnityWorld);
                 UnityEngine.Quaternion markerRot = ArUcoUtils.GetQuatFromMatrix(transformUnityWorld);
 
-                // Update UI with detections
+                // Place Object on marker
                 UnityEngine.WSA.Application.InvokeOnAppThread(() =>
                 {
-                    HUD.text = "Detected " + markers.Count + " markers" +
-                    "\nLast camera frame processed in " + frameProcessingTime + " ms";
-
-                    string markerText = "[Marker " + marker.Id() + "]";
                     string markerName = "marker" + marker.Id();
 
                     var instance = GameObject.Find(markerName);
@@ -256,11 +241,7 @@ public class ArUcoTracking : MonoBehaviour
                         // Create a new instance of the markerGo to represent the marker
                         var newInstance = Instantiate(markerGo, markerPos, markerRot);
                         newInstance.name = markerName;
-                        var tmp = newInstance.GetComponentInChildren<TextMeshProUGUI>();
-                        if (tmp != null)
-                            tmp.SetText(markerText);
-                        else
-                            Debug.LogError("TextMeshProUGUI not found on markerGo prefab — add one.");
+                        
                         newInstance.SetActive(true);
                         _markerGos.Add(newInstance);
                     }
@@ -275,8 +256,7 @@ public class ArUcoTracking : MonoBehaviour
             // Update UI
             UnityEngine.WSA.Application.InvokeOnAppThread(() =>
             {
-                HUD.text = "Detected " + markers.Count + " markers" +
-                    "\nLast camera frame processed in " + frameProcessingTime + " ms";
+                //
             }, false);
         }
     }
