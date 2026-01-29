@@ -49,14 +49,13 @@ public class ArUcoTracking : MonoBehaviour
     {
         try
         {
-            // Set markerGo's size & disable until markers detected
+            // Disable markerGo until markers detected
             if (markerGo == null)
             {
                 Debug.LogError("markerGo not assigned — create a prefab and assign it.");
                 return;
             }
 
-            markerGo.transform.localScale = new Vector3(markerSize, markerSize, markerSize);
             markerGo.SetActive(false);
 
             // Setup mediacapture specs - Alternative specs defined in CameraUtils.cs (enum MediaCaptureProfiles)
