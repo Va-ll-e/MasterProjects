@@ -60,32 +60,11 @@ public class ArUcoTracking : MonoBehaviour
             markerGo.transform.localScale = new Vector3(markerSize, markerSize, markerSize);
             markerGo.SetActive(false);
 
-            // Setup mediacapture specs
-            int width = 0;
-            int height = 0;
-            int frameRate = 30;
-
-            switch (mediaCaptureProfile)
-            {
-                case CameraUtils.MediaCaptureProfiles.HL2_2272x1278:
-                    width = 2272;
-                    height = 1278;
-                    break;
-                case CameraUtils.MediaCaptureProfiles.HL2_896x504:
-                    width = 896;
-                    height = 504;
-                    break;
-
-                case CameraUtils.MediaCaptureProfiles.HL2_1280x720:
-                    width = 1280;
-                    height = 720;
-                    break;
-
-                default:
-                    width = 0;
-                    height = 0;
-                    break;
-            }
+            // Setup mediacapture specs - Alternative specs defined in CameraUtils.cs (enum MediaCaptureProfiles)
+            var width = 896;
+            var height = 504;
+            var frameRate = 30;
+            
 
 #if ENABLE_WINMD_SUPPORT
             try
