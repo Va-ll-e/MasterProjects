@@ -21,7 +21,7 @@ public class ArUcoTracking : MonoBehaviour
     public CameraIntrinsics customCameraIntrinsics;                 // Holds the user defined calibration data
     public int collectInstances;                                    // How many instances of the aruco markers to collect before finding the position
     
-    private int _collectInstances;
+    private int _collectedInstances;
     private ArUcoUtils.ArUcoDictionary arUcoDictionary = ArUcoUtils.ArUcoDictionary.DICT_4X4_50;    // The ArUco dictionary the marker is generated from
     int frameCounter = 0;
     bool _isRunning = false;
@@ -129,6 +129,8 @@ public class ArUcoTracking : MonoBehaviour
     
     public void StopArUcoTracking() {
         _isRunning = false;
+        _collectedInstances = 0;
+        //_detectedMarkers.Clear();
     }
             
 #endif
@@ -161,6 +163,12 @@ public class ArUcoTracking : MonoBehaviour
             _frameCoordinateSystem = mediaFrameReference.CoordinateSystem;
 
             DetectMarkers(softwareBitmap, _cameraIntrinsics);
+
+            if (_collectedInstances >= collectInstances)
+            {
+                PlaceObject(_detectedMarkers[0]);
+                StopArUcoTracking();
+            }
         }
 
         // Dispose of the bitmap
@@ -184,11 +192,8 @@ public class ArUcoTracking : MonoBehaviour
 
         if (markers.Count != 0)
         {
-            var marker = markers[0];
-            
-            
-            
-            PlaceObject(marker);              
+            _detectedMarkers.Add(markers[0]);
+            _collectedInstances ++;
         }
         else
         {
