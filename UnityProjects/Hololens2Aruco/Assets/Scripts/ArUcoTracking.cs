@@ -20,6 +20,7 @@ public class ArUcoTracking : MonoBehaviour
     public bool autoReleaseMarkerGos;                               // After a preset time, every instance of the markerGo will be removed
     public bool useCustomCameraIntrinsics;                          // Enables custom camera calibration parameters instead of quierying it from frames
     public CameraIntrinsics customCameraIntrinsics;                 // Holds the user defined calibration data
+    public int collectInstances;                                    // How many instances of the aruco markers to collect before finding the position
     
     private ArUcoUtils.ArUcoDictionary arUcoDictionary = ArUcoUtils.ArUcoDictionary.DICT_4X4_50;    // The ArUco dictionary the marker is generated from
     private List<GameObject> _markerGos = new List<GameObject>();
@@ -31,7 +32,7 @@ public class ArUcoTracking : MonoBehaviour
 #if ENABLE_WINMD_SUPPORT
     OpenCVHelper _cvHelper = null;
     MediaCapturer _mediaCapturer = null;
-
+    private List<OpenCVBridge.DetectedMarker> _detectedMarkers = new List<OpenCVBridge.DetectedMarker>();
     Windows.Perception.Spatial.SpatialCoordinateSystem _unityCoordinateSystem = null;
     Windows.Perception.Spatial.SpatialCoordinateSystem _frameCoordinateSystem = null;
 #endif
@@ -75,7 +76,6 @@ public class ArUcoTracking : MonoBehaviour
 
                 RunArUcoTracking();
 
-                Debug.Log("ArUco tracking stopped.");
             }
             catch (Exception ex)
             {
@@ -197,53 +197,11 @@ public class ArUcoTracking : MonoBehaviour
 
         if (markers.Count != 0)
         {
-            // Iterate through the detected markers & place markerGos
-            foreach (var marker in markers)
-            {
-                UnityEngine.Vector3 translationUnity = ArUcoUtils.Vec3FromFloat3(marker.Position());
-                UnityEngine.Vector3 rotationRodrigues = ArUcoUtils.Vec3FromFloat3(marker.Rotation());
-                UnityEngine.Quaternion rotationUnity = ArUcoUtils.RotationQuatFromRodrigues(rotationRodrigues);
-
-                UnityEngine.Matrix4x4 markerTransformUnityCamera = ArUcoUtils.GetTransformInUnityCamera(translationUnity, rotationUnity);
-                UnityEngine.Matrix4x4 cameraToWorldUnity = CameraUtils.GetViewToUnityTransform(_frameCoordinateSystem, _unityCoordinateSystem);
-
-                if (cameraToWorldUnity == null)
-                {
-                    Debug.LogError("cameraToWorldUnity is null — check _frameCoordinateSystem or _unityCoordinateSystem.");
-                    return;
-                }
-
-                UnityEngine.Matrix4x4 transformUnityWorld = cameraToWorldUnity * markerTransformUnityCamera;
-
-                UnityEngine.Vector3 markerPos = ArUcoUtils.GetVectorFromMatrix(transformUnityWorld);
-                UnityEngine.Quaternion markerRot = ArUcoUtils.GetQuatFromMatrix(transformUnityWorld);
-
-                // Place Object on marker
-                UnityEngine.WSA.Application.InvokeOnAppThread(() =>
-                {
-                    string markerName = "marker" + marker.Id();
-
-                    var instance = GameObject.Find(markerName);
-
-                    if (instance != null)
-                    {
-                        // Update existing markerGo's position 
-                        instance.transform.SetPositionAndRotation(markerPos, markerRot);
-                    }
-                    else
-                    {
-                        // Create a new instance of the markerGo to represent the marker
-                        var newInstance = Instantiate(markerGo, markerPos, markerRot);
-                        newInstance.name = markerName;
-                        
-                        newInstance.SetActive(true);
-                        _markerGos.Add(newInstance);
-                    }
-
-                    Debug.Log("marker [" + marker.Id() + "] pos xyz: " + markerPos.x + " " + markerPos.y + " " + markerPos.z);
-
-                }, false);
-            }
+            var marker = markers[0];
+            
+            
+            
+            PlaceObject(marker);              
         }
         else
         {
@@ -254,6 +212,54 @@ public class ArUcoTracking : MonoBehaviour
             }, false);
         }
     }
+    
+    private void PlaceObject(OpenCVBridge.DetectedMarker marker)
+    {
+
+            UnityEngine.Vector3 translationUnity = ArUcoUtils.Vec3FromFloat3(marker.Position());
+            UnityEngine.Vector3 rotationRodrigues = ArUcoUtils.Vec3FromFloat3(marker.Rotation());
+            UnityEngine.Quaternion rotationUnity = ArUcoUtils.RotationQuatFromRodrigues(rotationRodrigues);
+
+            UnityEngine.Matrix4x4 markerTransformUnityCamera = ArUcoUtils.GetTransformInUnityCamera(translationUnity, rotationUnity);
+            UnityEngine.Matrix4x4 cameraToWorldUnity = CameraUtils.GetViewToUnityTransform(_frameCoordinateSystem, _unityCoordinateSystem);
+
+            if (cameraToWorldUnity == null)
+            {
+                Debug.LogError("cameraToWorldUnity is null — check _frameCoordinateSystem or _unityCoordinateSystem.");
+                return;
+            }
+
+            UnityEngine.Matrix4x4 transformUnityWorld = cameraToWorldUnity * markerTransformUnityCamera;
+
+            UnityEngine.Vector3 markerPos = ArUcoUtils.GetVectorFromMatrix(transformUnityWorld);
+            UnityEngine.Quaternion markerRot = ArUcoUtils.GetQuatFromMatrix(transformUnityWorld);
+
+        // Place Object on marker
+        UnityEngine.WSA.Application.InvokeOnAppThread(() =>
+        {
+            string markerName = "marker" + marker.Id();
+
+            var instance = GameObject.Find(markerName);
+
+            if (instance != null)
+            {
+                // Update existing markerGo's position 
+                instance.transform.SetPositionAndRotation(markerPos, markerRot);
+            }
+            else
+            {
+                // Create a new instance of the markerGo to represent the marker
+                var newInstance = Instantiate(markerGo, markerPos, markerRot);
+                newInstance.name = markerName;
+                
+                newInstance.SetActive(true);
+                _markerGos.Add(newInstance);
+            }
+
+        }, false);
+    }
+    
+    
 #endif
 }
 
