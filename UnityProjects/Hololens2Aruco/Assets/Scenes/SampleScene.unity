@@ -804,6 +804,7 @@ MonoBehaviour:
     principalPoint: {x: 439.4484, y: 238.6071}
     radialDistortion: {x: -0.01862742, y: 0.7293355, z: -2.991346}
     tangentialDistortion: {x: -0.001943871, y: 0.0008217751}
+  collectInstances: 0
 --- !u!114 &1662850474
 MonoBehaviour:
   m_ObjectHideFlags: 0

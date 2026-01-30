@@ -17,13 +17,12 @@ public class ArUcoTracking : MonoBehaviour
 {
     public float markerSize;                                        // Size of the printed aruco marker's side in meters
     public GameObject markerGo;                                     // Game object that is rendered on top of detected markers
-    public bool autoReleaseMarkerGos;                               // After a preset time, every instance of the markerGo will be removed
     public bool useCustomCameraIntrinsics;                          // Enables custom camera calibration parameters instead of quierying it from frames
     public CameraIntrinsics customCameraIntrinsics;                 // Holds the user defined calibration data
     public int collectInstances;                                    // How many instances of the aruco markers to collect before finding the position
     
+    private int _collectInstances;
     private ArUcoUtils.ArUcoDictionary arUcoDictionary = ArUcoUtils.ArUcoDictionary.DICT_4X4_50;    // The ArUco dictionary the marker is generated from
-    private List<GameObject> _markerGos = new List<GameObject>();
     int frameCounter = 0;
     bool _isRunning = false;
     CameraIntrinsics perFrameCameraIntrinsics;
@@ -94,19 +93,7 @@ public class ArUcoTracking : MonoBehaviour
 
     private void Update()
     {
-        if (frameCounter == 30)
-        {
-            if (autoReleaseMarkerGos)
-            {
-                for (int i = 0; i < _markerGos.Count; i++)
-                {
-                    GameObject.Destroy(_markerGos[i]);
-                }
-                _markerGos.Clear();
-            }
-            frameCounter = 0;
-        }
-        frameCounter++;
+       
     }
 
     private async void OnApplicationFocus(bool focus)
@@ -237,24 +224,9 @@ public class ArUcoTracking : MonoBehaviour
         // Place Object on marker
         UnityEngine.WSA.Application.InvokeOnAppThread(() =>
         {
-            string markerName = "marker" + marker.Id();
-
-            var instance = GameObject.Find(markerName);
-
-            if (instance != null)
-            {
                 // Update existing markerGo's position 
-                instance.transform.SetPositionAndRotation(markerPos, markerRot);
-            }
-            else
-            {
-                // Create a new instance of the markerGo to represent the marker
-                var newInstance = Instantiate(markerGo, markerPos, markerRot);
-                newInstance.name = markerName;
-                
-                newInstance.SetActive(true);
-                _markerGos.Add(newInstance);
-            }
+                markerGo.transform.SetPositionAndRotation(markerPos, markerRot);
+                markerGo.SetActive(true);
 
         }, false);
     }
