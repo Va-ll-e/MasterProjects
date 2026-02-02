@@ -84,6 +84,15 @@ public class ArUcoTracking : MonoBehaviour
 #endif
     }
 
+    private void Update()
+    {
+        if (_currentTrackDuration <= lockTime)
+        {
+            _currentTrackDuration += Time.deltaTime;
+        }
+    }
+    
+    
     private async void OnApplicationFocus(bool focus)
     {
 #if ENABLE_WINMD_SUPPORT
@@ -102,6 +111,12 @@ public class ArUcoTracking : MonoBehaviour
         _isRunning = true;
         _isLocked = false;
         _currentTrackDuration = 0f;
+
+        if (markerGo.GetComponent<ARAnchor>() != null)
+        {
+            Destroy(markerGo.GetComponent<ARAnchor>());
+        }
+        
 
         await Task.Run(async () =>
         {
@@ -202,9 +217,6 @@ public class ArUcoTracking : MonoBehaviour
             // SMOOTHING: Lerp reduces the "Jitter" you saw
             markerGo.transform.position = finalPos;
             markerGo.transform.rotation = finalRot;
-
-            // TIMER LOGIC
-            _currentTrackDuration += Time.deltaTime;
 
             if (_currentTrackDuration >= lockTime)
             {
