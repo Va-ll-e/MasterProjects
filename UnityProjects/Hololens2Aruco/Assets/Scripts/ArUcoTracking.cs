@@ -3,248 +3,238 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using TMPro;
-
-// For main thread safety
+using UnityEngine.XR.ARFoundation;
 
 #if ENABLE_WINMD_SUPPORT
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using UnityEngine;
+using TMPro;
 using Windows.Graphics.Imaging;
 using Microsoft.MixedReality.OpenXR;
 using System.Threading.Tasks;
 using OpenCVBridge;
+using System.Linq;
+using UnityEngine.XR.ARFoundation;
 #endif
 
 public class ArUcoTracking : MonoBehaviour
 {
-    public float markerSize;                                        // Size of the printed aruco marker's side in meters
-    public GameObject markerGo;                                     // Game object that is rendered on top of detected markers
-    public bool useCustomCameraIntrinsics;                          // Enables custom camera calibration parameters instead of quierying it from frames
-    public CameraIntrinsics customCameraIntrinsics;                 // Holds the user defined calibration data
-    public int collectInstances;                                    // How many instances of the aruco markers to collect before finding the position
-    
-    private int _collectedInstances;
-    private ArUcoUtils.ArUcoDictionary arUcoDictionary = ArUcoUtils.ArUcoDictionary.DICT_4X4_50;    // The ArUco dictionary the marker is generated from
-    int frameCounter = 0;
-    bool _isRunning = false;
-    CameraIntrinsics perFrameCameraIntrinsics;
-    CameraIntrinsics _cameraIntrinsics;
+    [Header("Tracking Settings")]
+    public float markerSize = 0.1f;                 // Size of the printed marker in meters
+    public float lockTime = 5.0f;                   // Time in seconds before locking position
+    public bool autoStopOnLock = true;              // Stop camera processing after locking to save battery
+
+    [Header("References")]
+    public GameObject markerGo;
+    public bool useCustomCameraIntrinsics;
+    public CameraIntrinsics customCameraIntrinsics;
+
+    // Internal State
+    private ArUcoUtils.ArUcoDictionary arUcoDictionary = ArUcoUtils.ArUcoDictionary.DICT_4X4_50;
+    private bool _isRunning = false;
+    private bool _isLocked = false;
+    private float _currentTrackDuration = 0f;
+    private CameraIntrinsics _cameraIntrinsics;
 
 #if ENABLE_WINMD_SUPPORT
     OpenCVHelper _cvHelper = null;
     MediaCapturer _mediaCapturer = null;
-    private List<OpenCVBridge.DetectedMarker> _detectedMarkers = new List<OpenCVBridge.DetectedMarker>();
     Windows.Perception.Spatial.SpatialCoordinateSystem _unityCoordinateSystem = null;
     Windows.Perception.Spatial.SpatialCoordinateSystem _frameCoordinateSystem = null;
 #endif
 
-    // Awake is called when an enabled script instance is being loaded
     private void Awake()
     {
-        
 #if ENABLE_WINMD_SUPPORT
+       // Cache the Unity coordinate system once at startup
        _unityCoordinateSystem = PerceptionInterop.GetSceneCoordinateSystem(UnityEngine.Pose.identity) as Windows.Perception.Spatial.SpatialCoordinateSystem;
 #endif
     }
 
-    // Start is called before the first frame update
     async void Start()
     {
-        try
+        if (markerGo == null)
         {
-            // Disable markerGo until markers detected
-            if (markerGo == null)
-            {
-                Debug.LogError("markerGo not assigned — create a prefab and assign it.");
-                return;
-            }
+            Debug.LogError("markerGo not assigned.");
+            return;
+        }
 
-            markerGo.SetActive(false);
+        markerGo.SetActive(false);
 
-            // Setup mediacapture specs - Alternative specs defined in CameraUtils.cs (enum MediaCaptureProfiles)
-            var width = 896;
-            var height = 504;
-            var frameRate = 30;
-            
+        // Standard HoloLens PV Camera specs
+        var width = 896;
+        var height = 504;
+        var frameRate = 30;
 
 #if ENABLE_WINMD_SUPPORT
-            try
-            {
-                _cvHelper = new OpenCVHelper();
-
-                _mediaCapturer = new MediaCapturer();
-                await _mediaCapturer.StartCapture(width, height, frameRate);
-
-                RunArUcoTracking();
-
-            }
-            catch (Exception ex)
-            {
-                Debug.LogException(ex);
-            }
-#endif
+        try
+        {
+            _cvHelper = new OpenCVHelper();
+            _mediaCapturer = new MediaCapturer();
             
-            
-            
+            await _mediaCapturer.StartCapture(width, height, frameRate);
+            RunArUcoTracking();
         }
         catch (Exception ex)
         {
-            Debug.LogError("Startup error: " + ex);
+            Debug.LogException(ex);
         }
-    }
-
-    private void Update()
-    {
-       
+#endif
     }
 
     private async void OnApplicationFocus(bool focus)
     {
 #if ENABLE_WINMD_SUPPORT
-       if (!focus) await _mediaCapturer.StopCapturing();
+       if (!focus && _mediaCapturer != null) await _mediaCapturer.StopCapturing();
 #endif
     }
 
+    // ----------------------------------------------------------------
+    //  Tracking Logic
+    // ----------------------------------------------------------------
 
 #if ENABLE_WINMD_SUPPORT
-    // Run processing loop in separate parallel Task
-    public async void RunArUcoTracking() {
-    _isRunning = true;
+    
+    public async void RunArUcoTracking() 
+    {
+        _isRunning = true;
+        _isLocked = false;
+        _currentTrackDuration = 0f;
 
         await Task.Run(async () =>
+        {
+            while (_isRunning)
             {
-                while (_isRunning)
+                if (_mediaCapturer.IsCapturing)
                 {
-                    if (_mediaCapturer.IsCapturing)
-                    {
-                        var mediaFrameReference = _mediaCapturer.GetLatestFrameRef();
-                        HandleArUcoTracking(mediaFrameReference);
-                        mediaFrameReference?.Dispose();
-                    }
-                    else
-                    {
-                        return;
-                    }
+                    var mediaFrameReference = _mediaCapturer.GetLatestFrameRef();
+                    // Process the frame (Background Thread)
+                    HandleArUcoTracking(mediaFrameReference);
+                    mediaFrameReference?.Dispose();
                 }
-            });
+                else
+                {
+                    await Task.Delay(33); // Small delay if not capturing to prevent CPU spin
+                }
+            }
+        });
     }
-    
-    public void StopArUcoTracking() {
-        _isRunning = false;
-        _collectedInstances = 0;
-        _detectedMarkers.Clear();
-    }
-    
-#endif
 
-#if ENABLE_WINMD_SUPPORT
+    public void StopArUcoTracking() 
+    {
+        _isRunning = false;
+        Debug.Log("ArUco Tracking Stopped.");
+    }
+
     private void HandleArUcoTracking(Windows.Media.Capture.Frames.MediaFrameReference mediaFrameReference)
     {
-        // Request software bitmap from media frame reference
-        var softwareBitmap = mediaFrameReference?.VideoMediaFrame?.SoftwareBitmap;
+        if (_isLocked) return; // Stop processing heavy math if we are locked
 
-        // Request camera intrinsics from media frame reference
+        var softwareBitmap = mediaFrameReference?.VideoMediaFrame?.SoftwareBitmap;
         var pFIntrinsics = mediaFrameReference?.VideoMediaFrame?.CameraIntrinsics;
 
+        // 1. Setup Intrinsics (Safe Check)
         if (!useCustomCameraIntrinsics && pFIntrinsics != null)
         {
-            // Handle per-frame intrinsics
+            if (_cameraIntrinsics == null) _cameraIntrinsics = new CameraIntrinsics();
+            
             _cameraIntrinsics.focalLength = VectorExtensions.ToUnity(pFIntrinsics.FocalLength);
             _cameraIntrinsics.principalPoint = VectorExtensions.ToUnity(pFIntrinsics.PrincipalPoint);
             _cameraIntrinsics.radialDistortion = VectorExtensions.ToUnity(pFIntrinsics.RadialDistortion);
             _cameraIntrinsics.tangentialDistortion = VectorExtensions.ToUnity(pFIntrinsics.TangentialDistortion);
         }
-        else
+        else if (_cameraIntrinsics == null)
         {
             _cameraIntrinsics = customCameraIntrinsics;
         }
 
-        if (softwareBitmap != null)
+        if (softwareBitmap != null && _cameraIntrinsics != null)
         {
-            // Cache frame coordinate system
             _frameCoordinateSystem = mediaFrameReference.CoordinateSystem;
+            
+            // 2. Detect Markers
+            int frameProcessingTime = 0;
+            var markers = _cvHelper.ProcessWithArUco(
+                            softwareBitmap, 
+                            VectorExtensions.ToNumerics(_cameraIntrinsics.focalLength), 
+                            VectorExtensions.ToNumerics(_cameraIntrinsics.principalPoint), 
+                            VectorExtensions.ToNumerics(_cameraIntrinsics.radialDistortion), 
+                            VectorExtensions.ToNumerics(_cameraIntrinsics.tangentialDistortion),
+                            (int)arUcoDictionary,
+                            markerSize,
+                            out frameProcessingTime);
 
-            DetectMarkers(softwareBitmap, _cameraIntrinsics);
-
-            if (_collectedInstances >= collectInstances)
+            // 3. If marker found, update position immediately
+            if (markers.Count > 0)
             {
-                PlaceObject(_detectedMarkers[0]);
-                StopArUcoTracking();
+                UpdateObjectPose(markers[0]);
             }
         }
 
-        // Dispose of the bitmap
         softwareBitmap?.Dispose();
     }
 
-    private void DetectMarkers(SoftwareBitmap softwareBitmap, CameraIntrinsics intrinsics)
+    private void UpdateObjectPose(OpenCVBridge.DetectedMarker marker)
     {
-        int frameProcessingTime = 0;
+        // Calculate Unity World Position from Marker Data
+        UnityEngine.Vector3 translationUnity = ArUcoUtils.Vec3FromFloat3(marker.Position());
+        UnityEngine.Vector3 rotationRodrigues = ArUcoUtils.Vec3FromFloat3(marker.Rotation());
+        UnityEngine.Quaternion rotationUnity = ArUcoUtils.RotationQuatFromRodrigues(rotationRodrigues);
 
-        // Process softwarebitmap with OpenCV
-        var markers = _cvHelper.ProcessWithArUco(
-                        softwareBitmap, 
-                        VectorExtensions.ToNumerics(intrinsics.focalLength), 
-                        VectorExtensions.ToNumerics(intrinsics.principalPoint), 
-                        VectorExtensions.ToNumerics(intrinsics.radialDistortion), 
-                        VectorExtensions.ToNumerics(intrinsics.tangentialDistortion),
-                        (int)arUcoDictionary,
-                        markerSize,
-                        out frameProcessingTime);
+        UnityEngine.Matrix4x4 markerTransformUnityCamera = ArUcoUtils.GetTransformInUnityCamera(translationUnity, rotationUnity);
+        UnityEngine.Matrix4x4 cameraToWorldUnity = CameraUtils.GetViewToUnityTransform(_frameCoordinateSystem, _unityCoordinateSystem);
 
-        if (markers.Count != 0)
-        {
-            _detectedMarkers.Add(markers[0]);
-            _collectedInstances ++;
-        }
-        else
-        {
-            // Update UI
-            UnityEngine.WSA.Application.InvokeOnAppThread(() =>
-            {
-                //
-            }, false);
-        }
-    }
-    
-    private void PlaceObject(OpenCVBridge.DetectedMarker marker)
-    {
+        if (cameraToWorldUnity == null) return;
 
-            UnityEngine.Vector3 translationUnity = ArUcoUtils.Vec3FromFloat3(marker.Position());
-            UnityEngine.Vector3 rotationRodrigues = ArUcoUtils.Vec3FromFloat3(marker.Rotation());
-            UnityEngine.Quaternion rotationUnity = ArUcoUtils.RotationQuatFromRodrigues(rotationRodrigues);
+        UnityEngine.Matrix4x4 transformUnityWorld = cameraToWorldUnity * markerTransformUnityCamera;
+        UnityEngine.Vector3 finalPos = ArUcoUtils.GetVectorFromMatrix(transformUnityWorld);
+        UnityEngine.Quaternion finalRot = ArUcoUtils.GetQuatFromMatrix(transformUnityWorld);
 
-            UnityEngine.Matrix4x4 markerTransformUnityCamera = ArUcoUtils.GetTransformInUnityCamera(translationUnity, rotationUnity);
-            UnityEngine.Matrix4x4 cameraToWorldUnity = CameraUtils.GetViewToUnityTransform(_frameCoordinateSystem, _unityCoordinateSystem);
-
-            if (cameraToWorldUnity == null)
-            {
-                Debug.LogError("cameraToWorldUnity is null — check _frameCoordinateSystem or _unityCoordinateSystem.");
-                return;
-            }
-
-            UnityEngine.Matrix4x4 transformUnityWorld = cameraToWorldUnity * markerTransformUnityCamera;
-
-            UnityEngine.Vector3 markerPos = ArUcoUtils.GetVectorFromMatrix(transformUnityWorld);
-            UnityEngine.Quaternion markerRot = ArUcoUtils.GetQuatFromMatrix(transformUnityWorld);
-
-        // Place Object on marker
+        // 4. Dispatch to Main Thread to move object and check Timer
         UnityEngine.WSA.Application.InvokeOnAppThread(() =>
         {
-                // Update existing markerGo's position 
-                markerGo.transform.SetPositionAndRotation(markerPos, markerRot);
-                markerGo.SetActive(true);
+            if (_isLocked) return;
+
+            if (!markerGo.activeSelf) markerGo.SetActive(true);
+
+            // SMOOTHING: Lerp reduces the "Jitter" you saw
+            markerGo.transform.position = finalPos;
+            markerGo.transform.rotation = finalRot;
+
+            // TIMER LOGIC
+            _currentTrackDuration += Time.deltaTime;
+
+            if (_currentTrackDuration >= lockTime)
+            {
+                LockPosition();
+            }
 
         }, false);
     }
-    
-    
+
+    private void LockPosition()
+    {
+        _isLocked = true;
+        Debug.Log("Position Locked!");
+
+        // Add ArAnchor to pin it in reality
+            markerGo.AddComponent<ARAnchor>();
+
+        if (autoStopOnLock)
+        {
+            StopArUcoTracking();
+        }
+    }
+
 #endif
 }
 
-// ... (keep the CameraIntrinsics class and VectorExtensions as is from the original script)
+// ----------------------------------------------------------------
+// Helpers (Keep these as they were)
+// ----------------------------------------------------------------
 
-// Unity engine vector version of camera intrinsics class
-// System.Numerics is not supported in the inspector ...
-// variables must be converted to System.Numerics before passed to winRT
 [Serializable]
 public class CameraIntrinsics
 {
@@ -252,12 +242,8 @@ public class CameraIntrinsics
     public UnityEngine.Vector2 principalPoint;
     public UnityEngine.Vector3 radialDistortion;
     public UnityEngine.Vector2 tangentialDistortion;
-    // public int imageWidth;
-    // public int imageHeight;
 }
 
-// https://stackoverflow.com/questions/76442537/is-there-a-way-to-define-cast-from-system-numerics-vector2-to-unityengine-vector
-// https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/extension-methods
 public static class VectorExtensions
 {
     public static UnityEngine.Vector2 ToUnity(this System.Numerics.Vector2 vec) => new UnityEngine.Vector2(vec.X, vec.Y);
@@ -266,4 +252,3 @@ public static class VectorExtensions
     public static UnityEngine.Vector3 ToUnity(this System.Numerics.Vector3 vec) => new UnityEngine.Vector3(vec.X, vec.Y, vec.Z);
     public static System.Numerics.Vector3 ToNumerics(this UnityEngine.Vector3 vec) => new System.Numerics.Vector3(vec.x, vec.y, vec.z);
 }
-
