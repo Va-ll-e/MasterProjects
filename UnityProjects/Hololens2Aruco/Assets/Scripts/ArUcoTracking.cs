@@ -130,9 +130,9 @@ public class ArUcoTracking : MonoBehaviour
     public void StopArUcoTracking() {
         _isRunning = false;
         _collectedInstances = 0;
-        //_detectedMarkers.Clear();
+        _detectedMarkers.Clear();
     }
-            
+    
 #endif
 
 #if ENABLE_WINMD_SUPPORT
