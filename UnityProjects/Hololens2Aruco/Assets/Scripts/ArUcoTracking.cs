@@ -112,6 +112,8 @@ public class ArUcoTracking : MonoBehaviour
         _isLocked = false;
         _currentTrackDuration = 0f;
 
+        Debug.Log("ArUco Tracking Started.");
+
         if (markerGo.GetComponent<ARAnchor>() != null)
         {
             Destroy(markerGo.GetComponent<ARAnchor>());
