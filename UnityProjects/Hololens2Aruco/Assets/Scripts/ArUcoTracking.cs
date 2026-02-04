@@ -23,7 +23,7 @@ public class ArUcoTracking : MonoBehaviour
 {
     [Header("Tracking Settings")]
     public float markerSize = 0.1f;                 // Size of the printed marker in meters
-    public float lockTime = 5.0f;                   // Time in seconds before locking position
+    public float lockTime = 1.0f;                   // Time in seconds before locking position
     public bool autoStopOnLock = true;              // Stop camera processing after locking to save battery
 
     [Header("References")]
@@ -75,7 +75,6 @@ public class ArUcoTracking : MonoBehaviour
             _mediaCapturer = new MediaCapturer();
             
             await _mediaCapturer.StartCapture(width, height, frameRate);
-            RunArUcoTracking();
         }
         catch (Exception ex)
         {
@@ -112,8 +111,6 @@ public class ArUcoTracking : MonoBehaviour
         _isLocked = false;
         _currentTrackDuration = 0f;
 
-        Debug.Log("ArUco Tracking Started.");
-
         if (markerGo.GetComponent<ARAnchor>() != null)
         {
             Destroy(markerGo.GetComponent<ARAnchor>());
@@ -142,7 +139,6 @@ public class ArUcoTracking : MonoBehaviour
     public void StopArUcoTracking() 
     {
         _isRunning = false;
-        Debug.Log("ArUco Tracking Stopped.");
     }
 
     private void HandleArUcoTracking(Windows.Media.Capture.Frames.MediaFrameReference mediaFrameReference)
@@ -216,7 +212,6 @@ public class ArUcoTracking : MonoBehaviour
 
             if (!markerGo.activeSelf) markerGo.SetActive(true);
 
-            // SMOOTHING: Lerp reduces the "Jitter" you saw
             markerGo.transform.position = finalPos;
             markerGo.transform.rotation = finalRot;
 
@@ -234,7 +229,7 @@ public class ArUcoTracking : MonoBehaviour
         Debug.Log("Position Locked!");
 
         // Add ArAnchor to pin it in reality
-            markerGo.AddComponent<ARAnchor>();
+           markerGo.AddComponent<ARAnchor>();
 
         if (autoStopOnLock)
         {

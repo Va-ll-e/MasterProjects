@@ -1,16 +1,16 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <ui:VisualElement enabled="true" name="VisualElement" style="flex-grow: 1; background-color: rgba(238, 238, 238, 0.39);">
         <ui:Button text="Scan ArUco Tag" name="scanBtn" style="-unity-font-style: normal;" />
-        <ui:Toggle label="Toggle ArUco Box" name="toggleAruco" value="true" />
-        <ui:Foldout text="Finetune-position" enabled="true" toggle-on-label-click="true" value="false" style="width: 250px;">
-            <ui:Slider label="X-position" value="0" high-value="10" name="xpos" fill="false" low-value="-10" />
-            <ui:Slider label="Y-position" value="0" high-value="10" name="ypos" low-value="-10" />
-            <ui:Slider label="Z-position" value="0" high-value="10" name="zpos" low-value="-10" />
+        <ui:Toggle label="Toggle ArUco Box" name="toggleAruco" value="false" />
+        <ui:Foldout text="Finetune-position" enabled="true" toggle-on-label-click="true" value="false" name="position" style="width: 250px;">
+            <ui:Slider label="X-position" value="0" high-value="1" name="xPos" fill="false" low-value="-1" />
+            <ui:Slider label="Y-position" value="0" high-value="1" name="yPos" low-value="-1" />
+            <ui:Slider label="Z-position" value="0" high-value="1" name="zPos" low-value="-1" />
         </ui:Foldout>
-        <ui:Foldout text="Finetune-rotation" value="false" style="-unity-font-style: normal;">
-            <ui:Slider label="X-rotation" value="0" high-value="10" name="xrot" low-value="-10" />
-            <ui:Slider label="Y-rotation" value="0" high-value="10" name="yrot" low-value="-10" />
-            <ui:Slider label="Z-rotation" value="0" high-value="10" name="zrot" low-value="-10" />
+        <ui:Foldout text="Finetune-rotation" value="false" name="rotation" style="-unity-font-style: normal;">
+            <ui:Slider label="X-rotation" value="0" high-value="10" name="xRot" low-value="-10" />
+            <ui:Slider label="Y-rotation" value="0" high-value="10" name="yRot" low-value="-10" />
+            <ui:Slider label="Z-rotation" value="0" high-value="10" name="zRot" low-value="-10" />
         </ui:Foldout>
     </ui:VisualElement>
 </ui:UXML>
