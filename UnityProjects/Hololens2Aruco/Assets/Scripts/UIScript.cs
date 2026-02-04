@@ -61,8 +61,8 @@ public class UIScript : MonoBehaviour
 
     private void UpdateOffset()
     {
-        
-        arucoGameObject.transform.localPosition = new Vector3(_xPos.value, _yPos.value, _zPos.value);
+        // We have to flip the xValue because of OpenCV's right-handed coordinate system as compared to Unity's left-handed 
+        arucoGameObject.transform.localPosition = new Vector3(-_xPos.value, _yPos.value, _zPos.value);
         arucoGameObject.transform.localEulerAngles = new Vector3(_xRot.value, _yRot.value, _zRot.value);
         
     }
